@@ -20,6 +20,12 @@ def borehole(input):
 
     """
 
+    input_default = np.array(
+        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55],
+        dtype=float,
+    )
+
+    input = np.append(input, input_default[len(input) :])
     output = (
         (2 * np.pi * input[0] * (input[1] - input[2]))
         / np.log(input[3] / input[4])
