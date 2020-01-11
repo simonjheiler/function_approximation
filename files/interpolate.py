@@ -94,7 +94,7 @@ def state_to_id(state, dims_state_grid):
 
 
 def state_from_id(index, dims_state_grid):
-    """Convert *idx* to state series structured according to *dims_state_grid*"""
+    """Convert *idx* to state array structured according to *dims_state_grid*"""
 
     entries = [index] * len(dims_state_grid)
     divisors = []

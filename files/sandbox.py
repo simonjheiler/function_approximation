@@ -1,4 +1,5 @@
-# import pdb
+import pdb  # noqa F401
+
 import numpy as np
 from functions_to_approximate import borehole  # noqa F401
 from interpolate import evaluation_batch  # noqa F401
@@ -42,8 +43,6 @@ interpolation_points = 50
 
 dims_state_grid = get_dims_state_grid(n_state_variables, n_gridpoints)
 grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
-
-
 states, results = get_data(dims_state_grid, grids_values)
 
 n_states, n_dims = states.shape
@@ -80,3 +79,5 @@ index_test = range(29)
 dims_state_grid_test = np.array(object=[3, 2, 5])
 states_test = states_from_ids_batch(index_test, dims_state_grid_test)
 print(states_test)
+
+pdb.set_trace()
