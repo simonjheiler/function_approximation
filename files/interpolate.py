@@ -231,7 +231,9 @@ def get_data(dims_state_grid, grids_values):
 
 def interpolate_linear(state, basis_points, basis_results):
 
-    interpolator = scipy.interpolate.LinearNDInterpolator(basis_points, basis_results)
+    interpolator = scipy.interpolate.LinearNDInterpolator(
+        basis_points, basis_results, rescale=True,
+    )
 
     predicted_output = interpolator.__call__(state)
 

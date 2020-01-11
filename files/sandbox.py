@@ -22,9 +22,9 @@ from interpolate import states_to_ids_batch  # noqa F401
 
 # import numba as nb
 
-n_state_variables = 4
+n_state_variables = 5
 
-n_gridpoints_defaults = np.array(object=[3, 7, 4, 3, 10, 10, 10, 10], dtype=int,)
+n_gridpoints_defaults = np.array(object=[5, 5, 5, 5, 5, 10, 10, 10], dtype=int,)
 grid_min_defaults = np.array(
     object=[63070.0, 990.0, 700.0, 100.0, 0.05, 1120.0, 1500.0, 63.1], dtype=float,
 )
@@ -39,7 +39,7 @@ grid_max = grid_max_defaults[:n_state_variables]
 
 n_states = n_gridpoints.prod()
 seed = 123
-interpolation_points = 50
+interpolation_points = 500
 
 dims_state_grid = get_dims_state_grid(n_state_variables, n_gridpoints)
 grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
@@ -47,37 +47,36 @@ states, results = get_data(dims_state_grid, grids_values)
 
 n_states, n_dims = states.shape
 
-states_index = np.array(object=range(n_states))
+index = np.array(object=range(n_states))
 not_interpolated = get_not_interpolated_indicator_random(
     interpolation_points, n_states, seed
 )
 
+print("get interpolation points")
 
 corner_states = get_corner_states(dims_state_grid)
 corner_index = states_to_ids_batch(corner_states, dims_state_grid)
-
-basis_index = np.unique(np.concatenate((states_index[not_interpolated], corner_index)))
-
+basis_index = np.unique(np.concatenate((index[not_interpolated], corner_index)))
 basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grids_values)
 basis_results = results[basis_index]
 
-states_grid = np.array(object=get_states_grid_dense(dims_state_grid))
+print("interpolate")
 
+index_interpolated = index[not (not_interpolated)]
+index_not_interpolated = index[not_interpolated]
 
-index_test = np.array(object=[17, 22, 34, 50, 110, 12])
+inputs = inputs_from_ids_batch(index_interpolated, dims_state_grid, grids_values)
+# pdb.set_trace()
+basis_points32 = basis_points.astype(np.float32)
+predict = interpolate_linear(inputs, basis_points32, basis_results)
+# pdb.set_trace()
+actual = results[index_interpolated]
+# pdb.set_trace()
 
-inputs_test = inputs_from_ids_batch(index_test, dims_state_grid, grids_values)
-predict_test = interpolate_linear(inputs_test, basis_points, basis_results)
-actual_test = results[index_test]
+print("calculate mean squared error")
 
-print(predict_test)
-print(actual_test)
-print(np.sum((predict_test - actual_test) ** 2) / len(predict_test))
+mse = np.sum((predict - actual) ** 2) / len(predict)
 
-
-index_test = range(29)
-dims_state_grid_test = np.array(object=[3, 2, 5])
-states_test = states_from_ids_batch(index_test, dims_state_grid_test)
-print(states_test)
+print(mse)
 
 pdb.set_trace()
