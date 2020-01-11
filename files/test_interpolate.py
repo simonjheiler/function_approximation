@@ -105,17 +105,17 @@ def test_state_from_id_last(setup_state_from_id):
     assert_array_equal(actual, expected)
 
 
-def test_states_from_ids_batch(setup_states_from_ids_batch):
-    expected = np.array(object=[[0, 0, 0], [1, 0, 4], [2, 1, 4]])
-    actual = states_from_ids_batch(**setup_states_from_ids_batch)
-    assert_array_equal(actual, expected)
-
-
 def test_state_from_id_high_dim(setup_state_from_id):
     setup_state_from_id["index"] = 242
     setup_state_from_id["dims_state_grid"] = np.array(object=[3, 7, 4, 3])
     expected = np.array(object=[2, 6, 0, 2])
     actual = state_from_id(**setup_state_from_id)
+    assert_array_equal(actual, expected)
+
+
+def test_states_from_ids_batch(setup_states_from_ids_batch):
+    expected = np.array(object=[[0, 0, 0], [1, 0, 4], [2, 1, 4]])
+    actual = states_from_ids_batch(**setup_states_from_ids_batch)
     assert_array_equal(actual, expected)
 
 

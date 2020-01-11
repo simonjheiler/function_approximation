@@ -97,18 +97,17 @@ def state_from_id(index, dims_state_grid):
     """Convert *idx* to state array structured according to *dims_state_grid*"""
 
     entries = [index] * len(dims_state_grid)
-    divisors = []
     for i in range(1, len(dims_state_grid)):
         value = 1
         for j in range(i, len(dims_state_grid)):
             value *= dims_state_grid[j]
-        divisors.append(value)
-        for k in range(len(dims_state_grid)):
+        for k in range(i - 1, len(dims_state_grid)):
             if k == i - 1:
                 entries[k] //= value
             else:
                 entries[k] %= value
-        out = np.array(object=entries)
+
+    out = np.array(object=entries)
 
     return out
 
