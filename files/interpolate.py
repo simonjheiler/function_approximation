@@ -1,9 +1,15 @@
 # import pdb
-# import numba as nb
 import numpy as np
 import pandas as pd
 import scipy.interpolate
 from functions_to_approximate import borehole
+
+# import numba as nb
+
+
+#########################################################################
+# FUNCTIONS
+#########################################################################
 
 
 def get_grids_values(dims_state_grid, grid_min, grid_max):
@@ -76,10 +82,21 @@ def get_corner_states(dims_state_grid):
     return corner_states
 
 
-def state_from_id(idx, dims_state_grid):
+def state_to_id(state, dims_state_grid):
+    id = 0
+    for i in range(len(dims_state_grid) - 1):
+        step_size = 1
+        for d in dims_state_grid[i + 1 :]:
+            step_size *= d
+        id += state[i] * step_size
+    id += state[-1]
+    return id
+
+
+def state_from_id(index, dims_state_grid):
     """Convert *idx* to state series structured according to *dims_state_grid*"""
 
-    entries = [idx] * len(dims_state_grid)
+    entries = [index] * len(dims_state_grid)
     divisors = []
     for i in range(1, len(dims_state_grid)):
         value = 1
@@ -96,69 +113,25 @@ def state_from_id(idx, dims_state_grid):
     return out
 
 
-# @nb.guvectorize(
-#     ["float64, float64[:], float64[:]"],
-#     "(), (n) -> (n)",
-#     nopython=True,
-#     target="parallel",
-# )
-# def states_from_ids_batch(index, dims_state_grid, states):
-#
-#     states[0] = state_from_id(index[0], dims_state_grid)
+def inputs_from_state(state, grids_values):
 
+    inputs_tmp = []
 
-# @nb.vectorize(
-#     ["float64(float64,float64[:])"],
-#     nopython = True
-# )
-# def states_from_ids_batch(index, dims_state_grid):
-#
-#     idx = index
-#     n_dims = len(dims_state_grid)
-#
-#     entries = [idx] * n_dims
-#     divisors = []
-#     for i in range(1, n_dims):
-#         value = 1
-#         for j in range(i, n_dims):
-#             value *= dims_state_grid[j]
-#         divisors.append(value)
-#         for k in range(n_dims):
-#             if k == i - 1:
-#                 entries[k] //= value
-#             else:
-#                 entries[k] %= value
-#         states = np.array(object=entries)
-#
-#     return states
+    for idx, val in enumerate(state):
+        input = grids_values[idx][val]
+        inputs_tmp.append(input)
 
-# @nb.guvectorize(
-#     ["f8[:], f8"],
-#     "(n) -> ()",
-#     nopython = True,
-#     target = "parallel",
-# )
-# def evaluation_batch(states, )
-#
-#     states[0] =
+    inputs = np.array(object=inputs_tmp)
 
-# @nb.guvectorize(
-#     ["f8[:], f8"],
-#     "(n) -> ()",
-#     nopython = True,
-#     target = "parallel",
-# )
-# def evaluation_batch(states, )
-#
-#     states[0] =
+    return inputs
 
 
 def states_from_ids_batch(index, dims_state_grid):
 
     states_tmp = []
 
-    for idx in range(len(index)):
-        state = state_from_id(idx, dims_state_grid)
+    for _idx, val in enumerate(index):
+        state = state_from_id(val, dims_state_grid)
         states_tmp.append(state)
 
     states = np.array(object=states_tmp)
@@ -173,19 +146,6 @@ def inputs_from_ids_batch(index, dims_state_grid, grids_values):
     for _idx, val in enumerate(index):
         state = state_from_id(val, dims_state_grid)
         input = inputs_from_state(state, grids_values)
-        inputs_tmp.append(input)
-
-    inputs = np.array(object=inputs_tmp)
-
-    return inputs
-
-
-def inputs_from_state(state, grids_values):
-
-    inputs_tmp = []
-
-    for idx, val in enumerate(state):
-        input = grids_values[idx][val]
         inputs_tmp.append(input)
 
     inputs = np.array(object=inputs_tmp)
@@ -209,17 +169,6 @@ def evaluation_batch(states, grids_values):
     results = np.array(object=out)
 
     return results
-
-
-def state_to_id(state, dims_state_grid):
-    id = 0
-    for i in range(len(dims_state_grid) - 1):
-        step_size = 1
-        for d in dims_state_grid[i + 1 :]:
-            step_size *= d
-        id += state[i] * step_size
-    id += state[-1]
-    return id
 
 
 def states_to_ids_batch(states, dims_state_grid):
@@ -288,58 +237,3 @@ def interpolate_linear(state, basis_points, basis_results):
     predicted_output = interpolator.__call__(state)
 
     return predicted_output
-
-
-n_state_variables = 4
-
-n_gridpoints_defaults = np.array(object=[3, 7, 4, 3, 10, 10, 10, 10], dtype=int,)
-grid_min_defaults = np.array(
-    object=[63070.0, 990.0, 700.0, 100.0, 0.05, 1120.0, 1500.0, 63.1], dtype=float,
-)
-grid_max_defaults = np.array(
-    object=[115600.0, 1110.0, 820.0, 50000.0, 0.15, 1680.0, 15000.0, 116.0],
-    dtype=float,
-)
-
-n_gridpoints = n_gridpoints_defaults[:n_state_variables]
-grid_min = grid_min_defaults[:n_state_variables]
-grid_max = grid_max_defaults[:n_state_variables]
-
-n_states = n_gridpoints.prod()
-seed = 123
-interpolation_points = 50
-
-dims_state_grid = get_dims_state_grid(n_state_variables, n_gridpoints)
-grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
-
-
-states, results = get_data(dims_state_grid, grids_values)
-
-n_states, n_dims = states.shape
-
-states_index = np.array(object=range(n_states))
-not_interpolated = get_not_interpolated_indicator_random(
-    interpolation_points, n_states, seed
-)
-
-
-corner_states = get_corner_states(dims_state_grid)
-corner_index = states_to_ids_batch(corner_states, dims_state_grid)
-
-basis_index = np.unique(np.concatenate((states_index[not_interpolated], corner_index)))
-
-basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grids_values)
-basis_results = results[basis_index]
-
-states_grid = np.array(object=get_states_grid_dense(dims_state_grid))
-
-
-index_test = [17, 22, 34, 50, 110, 12]
-
-inputs_test = inputs_from_ids_batch(index_test, dims_state_grid, grids_values)
-predict_test = interpolate_linear(inputs_test, basis_points, basis_results)
-actual_test = results[index_test]
-
-print(predict_test)
-print(actual_test)
-print(np.sum((predict_test - actual_test) ** 2) / len(predict_test))
