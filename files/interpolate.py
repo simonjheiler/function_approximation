@@ -238,3 +238,10 @@ def interpolate_linear(state, basis_points, basis_results):
     predicted_output = interpolator.__call__(state)
 
     return predicted_output
+
+
+def get_mean_squared_error(predicted, calculated):
+
+    mse = np.sum((predicted - calculated) ** 2) / len(calculated)
+
+    return mse
