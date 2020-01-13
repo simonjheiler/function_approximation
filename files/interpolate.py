@@ -240,8 +240,53 @@ def interpolate_linear(state, basis_points, basis_results):
     return predicted_output
 
 
-def get_mean_squared_error(predicted, calculated):
+def mse(x1, x2, axis=0):
+    """Calculate mean squared error.
 
-    mse = np.sum((predicted - calculated) ** 2) / len(calculated)
+    If ``x1`` and ``x2`` have different shapes, then they need to broadcast. This uses
+    :func:`numpy.asanyarray` to convert the input. Whether this is the desired result or
+    not depends on the array subclass, for example NumPy matrices will silently
+    produce an incorrect result.
 
-    return mse
+    Parameters
+    ----------
+    x1, x2 : array_like
+       The performance measure depends on the difference between these two arrays.
+    axis : int
+       Axis along which the summary statistic is calculated
+
+    Returns
+    -------
+    mse : numpy.ndarray or float
+       Mean squared error along given axis.
+
+    """
+    x1 = np.asanyarray(x1)
+    x2 = np.asanyarray(x2)
+    return np.mean((x1 - x2) ** 2, axis=axis)
+
+
+def rmse(x1, x2, axis=0):
+    """Calculate root mean squared error.
+
+    If ``x1`` and ``x2`` have different shapes, then they need to broadcast. This uses
+    :func:`numpy.asanyarray` to convert the input. Whether this is the desired result or
+    not depends on the array subclass, for example NumPy matrices will silently
+    produce an incorrect result.
+
+    Parameters
+    ----------
+    x1, x2 : array_like
+       The performance measure depends on the difference between these two arrays.
+    axis : int
+       Axis along which the summary statistic is calculated.
+
+    Returns
+    -------
+    rmse : numpy.ndarray or float
+       Root mean squared error along given axis.
+
+    """
+    x1 = np.asanyarray(x1)
+    x2 = np.asanyarray(x2)
+    return np.sqrt(mse(x1, x2, axis=axis))
