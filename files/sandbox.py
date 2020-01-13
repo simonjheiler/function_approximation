@@ -64,16 +64,24 @@ vars = vars_params[grid_size]
 
 n_gridpoints_defaults = np.array(object=[n_gridpoints_dim] * 8, dtype=int,)
 
-interpolation_points = {
-    1: (grid_density * (n_gridpoints_dim ** 0)).tolist(),
-    2: (grid_density * (n_gridpoints_dim ** 1)).tolist(),
-    3: (grid_density * (n_gridpoints_dim ** 2)).tolist(),
-    4: (grid_density * (n_gridpoints_dim ** 3)).tolist(),
-    5: (grid_density * (n_gridpoints_dim ** 4)).tolist(),
-    6: (grid_density * (n_gridpoints_dim ** 5)).tolist(),
-    7: (grid_density * (n_gridpoints_dim ** 6)).tolist(),
-    8: (grid_density * (n_gridpoints_dim ** 7)).tolist(),
-}
+interpolation_points = {}
+pdb.set_trace()
+
+for n_vars in vars:
+    interpolation_points[n_vars] = (
+        grid_density * (n_gridpoints_dim ** (n_vars - 1))
+    ).tolist()
+
+# interpolation_points = {
+#     1: (grid_density * (n_gridpoints_dim ** 0)).tolist(),
+#     2: (grid_density * (n_gridpoints_dim ** 1)).tolist(),
+#     3: (grid_density * (n_gridpoints_dim ** 2)).tolist(),
+#     4: (grid_density * (n_gridpoints_dim ** 3)).tolist(),
+#     5: (grid_density * (n_gridpoints_dim ** 4)).tolist(),
+#     6: (grid_density * (n_gridpoints_dim ** 5)).tolist(),
+#     7: (grid_density * (n_gridpoints_dim ** 6)).tolist(),
+#     8: (grid_density * (n_gridpoints_dim ** 7)).tolist(),
+# }
 
 if not (load_data):
 
