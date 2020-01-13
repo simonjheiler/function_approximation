@@ -326,9 +326,16 @@ elif load_data:
 
 
 plot_legend = []
+plot_x = []
+plot_y = []
 for n_vars in vars:
-    plt.plot(interpolation_points_effective[n_vars], np.sqrt(mse[n_vars]))
     plot_legend.append(n_vars)
+    plot_x.append(interpolation_points_effective[n_vars])
+    plot_y.append(np.sqrt(mse[n_vars]))
+
+for idx in range(len(vars)):
+    plt.plot(plot_x[idx], plot_y[idx])
+
 plt.xscale("log")
 plt.yscale("log")
 plt.xlabel("number of interpolation points (log axis)")
