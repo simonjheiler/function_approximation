@@ -2,7 +2,8 @@
 import numpy as np
 import pandas as pd
 import scipy.interpolate
-from functions_to_approximate import borehole
+
+from files.functions_to_approximate import borehole
 
 # import numba as nb
 
