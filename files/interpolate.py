@@ -256,7 +256,7 @@ def interpolate_linear(grid, func, interp_params):
     basis_index = np.unique(np.concatenate((index[not_interpolated], corner_index)))
     basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grids_values)
     basis_results = evaluation_batch(basis_points, func)
-
+    n_gridpoints_effective = basis_points.shape[0]
     # generate interpolator
     interpolator = sp_interpolate.LinearNDInterpolator(
         basis_points, basis_results, rescale=True,
@@ -276,7 +276,7 @@ def interpolate_linear(grid, func, interp_params):
     results_interp[not_interpolated] = basis_results
     results_interp[interpolated] = predicted_output
 
-    return results_interp
+    return results_interp, n_gridpoints_effective
 
 
 def interpolate_smolyak(grid, func, interp_params):
@@ -296,6 +296,7 @@ def interpolate_smolyak(grid, func, interp_params):
 
     # generate smolyak grid
     s_grid = sg(n_dims, mu, grid_min, grid_max)
+    n_gridpoints_effective = len(s_grid.grid)
 
     # evaluate function on grid
     f_on_grid = evaluation_batch(s_grid.grid, func)
@@ -307,7 +308,7 @@ def interpolate_smolyak(grid, func, interp_params):
     states_interpolated = inputs_from_ids_batch(index, dims_state_grid, grid)
     results_interp = s_interp.interpolate(states_interpolated)
 
-    return results_interp
+    return results_interp, n_gridpoints_effective
 
 
 def mse(x1, x2, axis=0):
