@@ -38,7 +38,7 @@ interp_params["smolyak"]["mu"] = 1
 study_params = {}
 
 study_params["controls"] = {
-    "load data": False,
+    "load data": True,
     "method": "smolyak",
     "grid size": "small",
     "variables": [2, 3, 4, 5, 6, 7, 8],
@@ -146,17 +146,24 @@ if not study_params["controls"]["load data"]:
 
     # save results to file
     file_to_store = open(
-        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/"
-        "topics_SBE/3_project/student-project-simonjheiler/data/sandbox/results.pkl",
+        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
+        "3_project/student-project-simonjheiler/data/sandbox/results.pkl",
         "wb",
     )
     pickle.dump(dict, file_to_store)
     file_to_store.close()
 
 elif study_params["controls"]["load data"]:
-    pass
+    method = study_params["controls"]["method"]
+    stored_results = open(
+        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
+        "3_project/student-project-simonjheiler/data/sandbox/results.pkl",
+        "rb",
+    )
+    results = pickle.load(stored_results)
 
 # plot results
+pdb.set_trace()
 plot_legend = []
 plot_x = []
 plot_y = []
