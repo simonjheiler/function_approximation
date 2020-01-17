@@ -15,5 +15,8 @@ dependencies:
 - pip
 - respy==2.0.0dev2
 - pre-commit==1.18.3
+- interpolation
+- pytorch
+- torchvision
 - pip:
   - grmpy==0.1.1.dev0

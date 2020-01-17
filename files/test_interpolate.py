@@ -1,13 +1,23 @@
-# import sys
+import sys
+
 import numpy as np
 import pytest
-from interpolate import get_corner_states
-from interpolate import inputs_from_ids_batch
-from interpolate import inputs_from_state
-from interpolate import state_from_id
-from interpolate import state_to_id
-from interpolate import states_from_ids_batch
-from interpolate import states_to_ids_batch
+
+sys.path.insert(
+    0,
+    (
+        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/"
+        "topics_SBE/3_project/student-project-simonjheiler"
+    ),
+)
+
+from files.interpolate import get_corner_states
+from files.interpolate import inputs_from_ids_batch
+from files.interpolate import inputs_from_state
+from files.interpolate import state_from_id
+from files.interpolate import state_to_id
+from files.interpolate import states_from_ids_batch
+from files.interpolate import states_to_ids_batch
 from numpy.testing import assert_array_equal
 
 # import pandas as pd

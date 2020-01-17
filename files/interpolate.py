@@ -1,9 +1,10 @@
-# import pdb
+import pdb  # noqa F401
+
 import numpy as np
 import pandas as pd
-import scipy.interpolate
-
-from files.functions_to_approximate import borehole
+import scipy.interpolate as sp_interpolate
+from interpolation.smolyak.grid import SmolyakGrid as sg
+from interpolation.smolyak.interp import SmolyakInterp as si
 
 # import numba as nb
 
@@ -17,23 +18,23 @@ def get_grids_values(dims_state_grid, grid_min, grid_max):
 
     n_dims = len(dims_state_grid)
 
-    grids_values = []
+    grids_values = {}
 
     for idx in range(n_dims):
         grid_values_tmp = np.linspace(
             grid_min[idx], grid_max[idx], dims_state_grid[idx],
         )
-        grids_values.append(grid_values_tmp)
+        grids_values[idx] = grid_values_tmp
 
-    grids_values = np.array(object=grids_values)
+    # grids_values = np.array(object=grids_values)
 
     return grids_values
 
 
-def get_dims_state_grid(n_state_variables, n_gridpoints):
+def get_dims_state_grid(n_dims, n_gridpoints):
 
-    tmp = np.zeros(n_state_variables, dtype=np.int)
-    for idx in range(n_state_variables):
+    tmp = np.zeros(n_dims, dtype=np.int)
+    for idx in range(n_dims):
         tmp[idx] = n_gridpoints[idx]
 
     dims_state_grid = np.array(object=list(tmp))
@@ -153,16 +154,15 @@ def inputs_from_ids_batch(index, dims_state_grid, grids_values):
     return inputs
 
 
-def evaluation_batch(states, grids_values):
+def evaluation_batch(points, func):
 
-    n_states, n_dims = states.shape
+    n_states, n_dims = points.shape
 
     out = []
 
     for idx in range(n_states):
 
-        inputs_tmp = inputs_from_state(states[idx, :], grids_values)
-        result_tmp = borehole(inputs_tmp)
+        result_tmp = func(points[idx, :])
 
         out.append(result_tmp)
 
@@ -230,15 +230,84 @@ def get_data(dims_state_grid, grids_values):
     return states, results
 
 
-def interpolate_linear(state, basis_points, basis_results):
+def interpolate_linear(grid, func, interp_params):
 
-    interpolator = scipy.interpolate.LinearNDInterpolator(
+    # load interpolation parameters
+    seed = interp_params["linear"]["seed"]
+    n_interpolation_points = interp_params["linear"]["n_interpolation_points"]
+
+    # get number of states, number of dimensions and index of states
+    n_dims = len(grid)
+    n_gridpoints = np.array(object=[len(v) for _, v in grid.items()])
+    grid_min = np.array(object=[min(v) for _, v in grid.items()])
+    grid_max = np.array(object=[max(v) for _, v in grid.items()])
+
+    dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
+    n_states = dims_state_grid.prod()
+    index = np.array(object=range(n_states))
+
+    # generate basis points and basis results
+    grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
+    corner_states = get_corner_states(dims_state_grid)
+    corner_index = states_to_ids_batch(corner_states, dims_state_grid)
+    not_interpolated = get_not_interpolated_indicator_random(
+        n_interpolation_points, n_states, seed
+    )
+    basis_index = np.unique(np.concatenate((index[not_interpolated], corner_index)))
+    basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grids_values)
+    basis_results = evaluation_batch(basis_points, func)
+
+    # generate interpolator
+    interpolator = sp_interpolate.LinearNDInterpolator(
         basis_points, basis_results, rescale=True,
     )
 
-    predicted_output = interpolator.__call__(state)
+    # calculate interpolated points
+    not_interpolated = np.in1d(index, basis_index)
+    interpolated = np.logical_not(not_interpolated)
+    index_interpolated = index[interpolated]
+    states_interpolated = inputs_from_ids_batch(
+        index_interpolated, dims_state_grid, grids_values
+    )
+    predicted_output = interpolator.__call__(states_interpolated)
 
-    return predicted_output
+    # return results
+    results_interp = np.full([len(index)], np.nan)
+    results_interp[not_interpolated] = basis_results
+    results_interp[interpolated] = predicted_output
+
+    return results_interp
+
+
+def interpolate_smolyak(grid, func, interp_params):
+
+    # load interpolation parameters
+    mu = interp_params["smolyak"]["mu"]
+
+    # get number of states, number of dimensions and index of states
+    n_dims = len(grid)
+    n_gridpoints = np.array(object=[len(v) for _, v in grid.items()])
+    grid_min = np.array(object=[min(v) for _, v in grid.items()])
+    grid_max = np.array(object=[max(v) for _, v in grid.items()])
+
+    dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
+    n_states = dims_state_grid.prod()
+    index = np.array(object=range(n_states))
+
+    # generate smolyak grid
+    s_grid = sg(n_dims, mu, grid_min, grid_max)
+
+    # evaluate function on grid
+    f_on_grid = evaluation_batch(s_grid.grid, func)
+
+    # generate interpolator
+    s_interp = si(s_grid, f_on_grid)
+
+    # calculate interpolated points
+    states_interpolated = inputs_from_ids_batch(index, dims_state_grid, grid)
+    results_interp = s_interp.interpolate(states_interpolated)
+
+    return results_interp
 
 
 def mse(x1, x2, axis=0):

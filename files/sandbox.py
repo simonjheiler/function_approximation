@@ -1,30 +1,42 @@
+import os  # noqa F401
 import pdb  # noqa F401
 import pickle  # noqa F401
+import sys
 
-import matplotlib.pyplot as plt
+sys.path.insert(
+    0,
+    (
+        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/"
+        "topics_SBE/3_project/student-project-simonjheiler"
+    ),
+)
+
+import matplotlib.pyplot as plt  # noqa F401
 import numpy as np
-from functions_to_approximate import borehole  # noqa F401
-from interpolate import evaluation_batch  # noqa F401
-from interpolate import get_corner_states  # noqa F401
-from interpolate import get_data  # noqa F401
-from interpolate import get_dims_state_grid  # noqa F401
-from interpolate import get_grids_indices  # noqa F401
-from interpolate import get_grids_values  # noqa F401
-from interpolate import get_not_interpolated_indicator_random  # noqa F401
-from interpolate import get_states_grid_dense  # noqa F401
-from interpolate import inputs_from_ids_batch  # noqa F401
-from interpolate import inputs_from_state  # noqa F401
-from interpolate import interpolate_linear  # noqa F401
-from interpolate import mse as mean_squared_error  # noqa F401
-from interpolate import state_from_id  # noqa F401
-from interpolate import state_to_id  # noqa F401
-from interpolate import states_from_ids_batch  # noqa F401
-from interpolate import states_to_ids_batch  # noqa F401
+from time import time
+
+from files.functions_to_approximate import borehole  # noqa F401
+from files.interpolate import evaluation_batch  # noqa F401
+from files.interpolate import get_corner_states  # noqa F401
+from files.interpolate import get_data  # noqa F401
+from files.interpolate import get_dims_state_grid  # noqa F401
+from files.interpolate import get_grids_indices  # noqa F401
+from files.interpolate import get_grids_values  # noqa F401
+from files.interpolate import get_not_interpolated_indicator_random  # noqa F401
+from files.interpolate import get_states_grid_dense  # noqa F401
+from files.interpolate import inputs_from_ids_batch  # noqa F401
+from files.interpolate import inputs_from_state  # noqa F401
+from files.interpolate import interpolate_linear  # noqa F401
+from files.interpolate import interpolate_smolyak  # nopa F401
+from files.interpolate import mse as mean_squared_error  # noqa F401
+from files.interpolate import rmse as root_mean_squared_error  # noqa F401
+from files.interpolate import state_from_id  # noqa F401
+from files.interpolate import state_to_id  # noqa F401
+from files.interpolate import states_from_ids_batch  # noqa F401
+from files.interpolate import states_to_ids_batch  # noqa F401
 
 # import pandas as pd
-
 # import numba as nb
-
 
 # default parameters for simulation study
 grid_min_defaults = np.array(
@@ -41,127 +53,131 @@ n_gridpoints_dim_params["medium"] = 10
 n_gridpoints_dim_params["large"] = 100
 
 grid_density_params = {}
-grid_density_params["small"] = np.array(object=[0, 1, 2, 3, 4, 5])
+grid_density_params["small"] = np.array(object=[0, 1])
 grid_density_params["medium"] = np.array(object=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 grid_density_params["large"] = np.array(
     object=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 )
 
 vars_params = {}
-vars_params["small"] = [2, 3, 4, 5]
+vars_params["small"] = [2, 3, 4, 5, 6, 7, 8]
 vars_params["medium"] = [2, 3, 4, 5]
 vars_params["large"] = [2]
 
 # set parameters for simulation study
 seed = 123
-load_data = True
-grid_size = "medium"
+load_data = False
+grid_size = "small"
 
 # load parameters
 n_gridpoints_dim = n_gridpoints_dim_params[grid_size]
 grid_density = grid_density_params[grid_size]
 vars = vars_params[grid_size]
 
-n_gridpoints_defaults = np.array(object=[n_gridpoints_dim] * 8, dtype=int,)
+n_gridpoints_defaults = np.array(object=[5, 5, 5, 5, 5, 5, 5, 5], dtype=int,)
 
 interpolation_points = {}
-pdb.set_trace()
+
+interp_params = {}
+interp_params["linear"] = {}
+interp_params["linear"]["seed"] = seed
+interp_params["smolyak"] = {}
+
+study_params = {
+    "linear": {},
+    "smolyak": {},
+}
+
+study_params["linear"]["iterations"] = []
+study_params["linear"]["grid_size"] = "small"
+
+study_params["smolyak"]["variables"] = [2, 3, 4, 5, 6, 7, 8]
+study_params["smolyak"]["iterations"] = [1, 2, 3]
+
 
 for n_vars in vars:
     interpolation_points[n_vars] = (
         grid_density * (n_gridpoints_dim ** (n_vars - 1))
     ).tolist()
 
-# interpolation_points = {
-#     1: (grid_density * (n_gridpoints_dim ** 0)).tolist(),
-#     2: (grid_density * (n_gridpoints_dim ** 1)).tolist(),
-#     3: (grid_density * (n_gridpoints_dim ** 2)).tolist(),
-#     4: (grid_density * (n_gridpoints_dim ** 3)).tolist(),
-#     5: (grid_density * (n_gridpoints_dim ** 4)).tolist(),
-#     6: (grid_density * (n_gridpoints_dim ** 5)).tolist(),
-#     7: (grid_density * (n_gridpoints_dim ** 6)).tolist(),
-#     8: (grid_density * (n_gridpoints_dim ** 7)).tolist(),
-# }
 
 if not (load_data):
 
-    iterations = list(range(len(grid_density)))
+    results = {}
+    results["linear"] = {"rmse": {}, "runtime": {}}
+    results["smolyak"] = {"rmse": {}, "runtime": {}}
 
-    mse = {}
-    interpolation_points_effective = {}
-
+    vars = study_params["smolyak"]["variables"]
     for n_vars in vars:
-        n_state_variables = n_vars
+        n_dims = n_vars
 
-        n_gridpoints = n_gridpoints_defaults[:n_state_variables]
-        grid_min = grid_min_defaults[:n_state_variables]
-        grid_max = grid_max_defaults[:n_state_variables]
+        n_gridpoints = n_gridpoints_defaults[:n_dims]
+        grid_min = grid_min_defaults[:n_dims]
+        grid_max = grid_max_defaults[:n_dims]
 
         n_states = n_gridpoints.prod()
+        dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
+        grid = get_grids_values(dims_state_grid, grid_min, grid_max)
+        index = np.array(object=range(n_states))
 
         mse_tmp = []
-        interpolation_points_effective_tmp = []
+        runtime_tmp = []
 
-        for iteration in iterations:
-            print("iteration: {}; number of variables: {}", iteration, n_vars)
-            n_interpolation_points = interpolation_points[n_vars][iteration]
+        for iteration in study_params["linear"]["iterations"]:
+            print(f"dimension: {n_vars}; iteration: {iteration}")
 
-            dims_state_grid = get_dims_state_grid(n_state_variables, n_gridpoints)
-            grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
+            # adjust interpolation parameters
+            interp_params["linear"]["n_interpolation_points"] = interpolation_points[
+                n_vars
+            ][iteration]
 
-            n_states = dims_state_grid.prod()
-            states_index = np.array(object=range(n_states), dtype=int)
-            states = states_from_ids_batch(states_index, dims_state_grid)
-            results = evaluation_batch(states, grids_values)
+            # interpolate and capture computation time
+            start_lin = time()
+            results_linear = interpolate_linear(grid, borehole, interp_params)
+            stop_lin = time()
 
-            index = np.array(object=range(n_states))
-            not_interpolated = get_not_interpolated_indicator_random(
-                n_interpolation_points, n_states, seed
-            )
+            # calculate actuals
+            inputs = inputs_from_ids_batch(index, dims_state_grid, grid)
+            results_calc = evaluation_batch(inputs, borehole)
 
-            print("get interpolation basis")
-            corner_states = get_corner_states(dims_state_grid)
-            corner_index = states_to_ids_batch(corner_states, dims_state_grid)
-            basis_index = np.unique(
-                np.concatenate((index[not_interpolated], corner_index))
-            )
-            basis_points = inputs_from_ids_batch(
-                basis_index, dims_state_grid, grids_values
-            )
-            basis_results = results[basis_index]
-
-            print("get interpolation points")
-            not_interpolated = np.in1d(index, basis_index)
-            interpolated = np.logical_not(not_interpolated)
-            index_not_interpolated = index[not_interpolated]
-            index_interpolated = index[interpolated]
-            inputs = inputs_from_ids_batch(
-                index_interpolated, dims_state_grid, grids_values
-            )
-
-            print("interpolate")
-            predict = interpolate_linear(inputs, basis_points, basis_results)
-            results_predicted = np.full_like(results, np.nan)
-            results_predicted[not_interpolated] = results[not_interpolated]
-            results_predicted[interpolated] = predict
-            results_calculated = results
-
+            # assess interpolation accuracy
             print("calculate mean squared error")
-            mse_iter = mean_squared_error(results_predicted, results_calculated)
-            mse_tmp.append(mse_iter)
-            print(mse_iter)
+            mse_iter_lin = mean_squared_error(results_linear, results_calc)
 
-            print("store effective number of interpolation points")
-            interpolation_points_effective_tmp.append(len(basis_index))
-            print(len(basis_index))
+            mse_tmp.append(mse_iter_lin)
+            runtime_tmp.append(stop_lin - start_lin)
+            print(f"mean squared error: linear {mse_iter_lin}")
+            print("computation time: linear {}".format(stop_lin - start_lin))
 
-        mse[n_vars] = np.array(object=mse_tmp)
-        interpolation_points_effective[n_vars] = np.array(
-            object=interpolation_points_effective_tmp
-        )
+        results["linear"]["rmse"][n_vars] = np.array(object=mse_tmp)
+        results["linear"]["runtime"][n_vars] = np.array(object=runtime_tmp)
 
-    print(mse)
-    print(interpolation_points_effective)
+        for iteration in study_params["smolyak"]["iterations"]:
+            print(f"dimension: {n_vars}; iteration: {iteration}")
+
+            # adjust interpolation parameters
+            interp_params["smolyak"]["mu"] = iteration
+
+            # interpolate and capture computation time
+            start_smo = time()
+            results_smolyak = interpolate_smolyak(grid, borehole, interp_params)
+            stop_smo = time()
+
+            # calculate actuals
+            inputs = inputs_from_ids_batch(index, dims_state_grid, grid)
+            results_calc = evaluation_batch(inputs, borehole)
+
+            # assess interpolation accuracy
+            print("calculate mean squared error")
+            mse_iter_smo = mean_squared_error(results_smolyak, results_calc)
+
+            mse_tmp.append(mse_iter_smo)
+            runtime_tmp.append(stop_smo - start_smo)
+            print(f"mean squared error: smolyak {mse_iter_smo}")
+            print("computation time: smolyak {}".format(stop_smo - start_smo))
+
+        results["smolyak"]["rmse"][n_vars] = np.array(object=mse_tmp)
+        results["smolyak"]["runtime"][n_vars] = np.array(object=runtime_tmp)
 
 elif load_data:
     if grid_size == "large":
@@ -333,21 +349,21 @@ elif load_data:
 # results_to_store.close()
 
 
-plot_legend = []
-plot_x = []
-plot_y = []
-for n_vars in vars:
-    plot_legend.append(n_vars)
-    plot_x.append(interpolation_points_effective[n_vars])
-    plot_y.append(np.sqrt(mse[n_vars]))
-
-for idx in range(len(vars)):
-    plt.plot(plot_x[idx], plot_y[idx])
-
-plt.xscale("log")
-plt.yscale("log")
-plt.xlabel("number of interpolation points (log axis)")
-plt.ylabel("root mean squared error (log axis)")
-plt.legend(plot_legend)
-plt.title("Interpolation accuracy (" + grid_size + " grid)")
-plt.show()
+# plot_legend = []
+# plot_x = []
+# plot_y = []
+# for n_vars in vars:
+#     plot_legend.append(n_vars)
+#     plot_x.append(interpolation_points_effective[n_vars])
+#     plot_y.append(np.sqrt(mse[n_vars]))
+#
+# for idx in range(len(vars)):
+#     plt.plot(plot_x[idx], plot_y[idx])
+#
+# plt.xscale("log")
+# plt.yscale("log")
+# plt.xlabel("number of interpolation points (log axis)")
+# plt.ylabel("root mean squared error (log axis)")
+# plt.legend(plot_legend)
+# plt.title("Interpolation accuracy (" + grid_size + " grid)")
+# plt.show()
