@@ -2,6 +2,8 @@ import pdb  # noqa F401
 import pickle
 import sys
 
+# import numba as nb
+
 sys.path.insert(
     0,
     (
@@ -23,7 +25,6 @@ from src.interpolate import interpolate_spline
 from src.interpolate import rmse as root_mean_squared_error
 
 # import pandas as pd
-# import numba as nb
 
 
 # set defaults for interpolation parameters
