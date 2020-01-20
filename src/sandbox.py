@@ -14,13 +14,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from time import time
 
-from code.functions_to_approximate import borehole
-from code.interpolate import evaluation_batch
-from code.interpolate import get_grids_values
-from code.interpolate import inputs_from_ids_batch
-from code.interpolate import interpolate_linear
-from code.interpolate import interpolate_smolyak
-from code.interpolate import rmse as root_mean_squared_error
+from src.functions_to_approximate import borehole
+from src.interpolate import evaluation_batch
+from src.interpolate import get_grids_values
+from src.interpolate import inputs_from_ids_batch
+from src.interpolate import interpolate_linear
+from src.interpolate import interpolate_smolyak
+from src.interpolate import rmse as root_mean_squared_error
 
 # import pandas as pd
 # import numba as nb
@@ -147,7 +147,7 @@ if not study_params["controls"]["load data"]:
     # save results to file
     file_to_store = open(
         "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
-        "3_project/student-project-simonjheiler/data/sandbox/results.pkl",
+        "3_project/student-project-simonjheiler/results/sandbox/test_results.pkl",
         "wb",
     )
     pickle.dump(dict, file_to_store)
@@ -157,7 +157,7 @@ elif study_params["controls"]["load data"]:
     method = study_params["controls"]["method"]
     stored_results = open(
         "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
-        "3_project/student-project-simonjheiler/data/sandbox/results.pkl",
+        "3_project/student-project-simonjheiler/results/sandbox/test_results.pkl",
         "rb",
     )
     results = pickle.load(stored_results)

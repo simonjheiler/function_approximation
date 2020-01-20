@@ -11,13 +11,13 @@ sys.path.insert(
     ),
 )
 
-from code.interpolate import get_corner_states
-from code.interpolate import inputs_from_ids_batch
-from code.interpolate import inputs_from_state
-from code.interpolate import state_from_id
-from code.interpolate import state_to_id
-from code.interpolate import states_from_ids_batch
-from code.interpolate import states_to_ids_batch
+from src.interpolate import get_corner_states
+from src.interpolate import inputs_from_ids_batch
+from src.interpolate import inputs_from_state
+from src.interpolate import state_from_id
+from src.interpolate import state_to_id
+from src.interpolate import states_from_ids_batch
+from src.interpolate import states_to_ids_batch
 from numpy.testing import assert_array_equal
 
 # import pandas as pd
