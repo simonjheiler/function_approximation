@@ -19,6 +19,7 @@ from src.interpolate import get_data
 from src.interpolate import get_grid
 from src.interpolate import interpolate_linear
 from src.interpolate import interpolate_smolyak
+from src.interpolate import interpolate_spline
 from src.interpolate import rmse as root_mean_squared_error
 
 # import pandas as pd
@@ -29,18 +30,21 @@ from src.interpolate import rmse as root_mean_squared_error
 interp_params = {}
 interp_params["linear"] = {}
 interp_params["linear"]["seed"] = 123
+interp_params["linear"]["grid_method"] = "regular"
 interp_params["linear"]["n_interpolation_points"] = 0
 interp_params["smolyak"] = {}
 interp_params["smolyak"]["mu"] = 1
+interp_params["spline"] = {}
+interp_params["spline"]["interpolation_points"] = 3
 
 # set study parameters
 study_params = {}
 
 study_params["controls"] = {
     "load data": False,
-    "method": "smolyak",
-    "grid size": "small",
-    "variables": [2, 3, 4, 5, 6, 7, 8],
+    "method": "linear",
+    "grid size": "medium",
+    "variables": [2, 3, 4, 5],
     "function to approximate": borehole,
 }
 
@@ -57,11 +61,16 @@ study_params["grid"] = {
 
 study_params["linear"] = {
     "interpolator": interpolate_linear,
-    "share_not_interpolated": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+    "share_not_interpolated": [0.0, 0.2, 0.4],
+    "interpolation_points": [2, 3, 5, 7, 9, 11],
 }
 study_params["smolyak"] = {
     "interpolator": interpolate_smolyak,
     "mu": [1, 2, 3],
+}
+study_params["spline"] = {
+    "interpolator": interpolate_spline,
+    "interpolation_points": [2, 3, 5, 7, 9, 11],
 }
 
 # run routine
@@ -72,9 +81,11 @@ if not study_params["controls"]["load data"]:
     func = study_params["controls"]["function to approximate"]
     grid_size = study_params["controls"]["grid size"]
     if method == "linear":
-        iterations = study_params["linear"]["share_not_interpolated"]
+        iterations = study_params["linear"]["interpolation_points"]
     elif method == "smolyak":
         iterations = study_params["smolyak"]["mu"]
+    elif method == "spline":
+        iterations = study_params["spline"]["interpolation_points"]
     interpolator = study_params[method]["interpolator"]
 
     # initiate dict to store results
@@ -106,11 +117,13 @@ if not study_params["controls"]["load data"]:
 
             # adjust interpolation parameters
             if study_params["controls"]["method"] == "linear":
-                n_interp_points = int(
-                    study_params["linear"]["share_not_interpolated"][iteration]
-                    * n_states
-                )
-                interp_params["linear"]["n_interpolation_points"] = n_interp_points
+                interp_params["linear"]["interpolation_points"] = study_params[
+                    "spline"
+                ]["interpolation_points"][iteration]
+            elif study_params["controls"]["method"] == "spline":
+                interp_params["spline"]["interpolation_points"] = study_params[
+                    "spline"
+                ]["interpolation_points"][iteration]
             elif study_params["controls"]["method"] == "smolyak":
                 interp_params["smolyak"]["mu"] = study_params["smolyak"]["mu"][
                     iteration
