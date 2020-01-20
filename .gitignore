@@ -3,4 +3,4 @@ __pxcache__/
 .idea/
 .ipynb_checkpoints/
 *.html
-data/sandbox/
+results/
