@@ -15,9 +15,8 @@ import numpy as np
 from time import time
 
 from src.functions_to_approximate import borehole
-from src.interpolate import evaluation_batch
-from src.interpolate import get_grids_values
-from src.interpolate import inputs_from_ids_batch
+from src.interpolate import get_data
+from src.interpolate import get_grid
 from src.interpolate import interpolate_linear
 from src.interpolate import interpolate_smolyak
 from src.interpolate import rmse as root_mean_squared_error
@@ -38,7 +37,7 @@ interp_params["smolyak"]["mu"] = 1
 study_params = {}
 
 study_params["controls"] = {
-    "load data": True,
+    "load data": False,
     "method": "smolyak",
     "grid size": "small",
     "variables": [2, 3, 4, 5, 6, 7, 8],
@@ -90,12 +89,11 @@ if not study_params["controls"]["load data"]:
         grid_max = study_params["grid"]["upper bounds"][:n_vars]
         dims_state_grid = np.array(object=[n_gridpoints] * n_vars, dtype=int,)
         n_states = dims_state_grid.prod()
-        grid = get_grids_values(dims_state_grid, grid_min, grid_max)
+        grid = get_grid(dims_state_grid, grid_min, grid_max)
         index = np.array(object=range(n_states))
 
-        # calculate actuals
-        inputs = inputs_from_ids_batch(index, dims_state_grid, grid)
-        results_calc = evaluation_batch(inputs, func)
+        # load or calculate actuals
+        _, results_calc = get_data(func, grid_size, n_vars, dims_state_grid, grid)
 
         # initiate objects to store results
         rmse_tmp = []
@@ -126,12 +124,11 @@ if not study_params["controls"]["load data"]:
             stop = time()
 
             # assess interpolation accuracy
-            print("calculate root mean squared error")
             rmse_iter = root_mean_squared_error(results_interp, results_calc)
 
             # print and store results
-            print(f"root mean squared error: linear {rmse_iter}")
-            print("computation time: linear {}".format(stop - start))
+            print("root mean squared error: " + method + f" {rmse_iter}")
+            print("computation time: " + method + " {}".format(stop - start))
             print(f"gridpoints: {n_gridpoints_effective}")
 
             rmse_tmp.append(rmse_iter)
@@ -163,7 +160,6 @@ elif study_params["controls"]["load data"]:
     results = pickle.load(stored_results)
 
 # plot results
-pdb.set_trace()
 plot_legend = []
 plot_x = []
 plot_y = []

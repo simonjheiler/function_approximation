@@ -14,21 +14,19 @@ from interpolation.smolyak.interp import SmolyakInterp as si
 #########################################################################
 
 
-def get_grids_values(dims_state_grid, grid_min, grid_max):
+def get_grid(dims_state_grid, grid_min, grid_max):
 
     n_dims = len(dims_state_grid)
 
-    grids_values = {}
+    grid = {}
 
     for idx in range(n_dims):
         grid_values_tmp = np.linspace(
             grid_min[idx], grid_max[idx], dims_state_grid[idx],
         )
-        grids_values[idx] = grid_values_tmp
+        grid[idx] = grid_values_tmp
 
-    # grids_values = np.array(object=grids_values)
-
-    return grids_values
+    return grid
 
 
 def get_dims_state_grid(n_dims, n_gridpoints):
@@ -40,30 +38,6 @@ def get_dims_state_grid(n_dims, n_gridpoints):
     dims_state_grid = np.array(object=list(tmp))
 
     return dims_state_grid
-
-
-def get_grids_indices(dims_state_grid):
-
-    grids_indices = []
-
-    for idx in range(dims_state_grid.size):
-        tmp = np.arange(dims_state_grid[idx])
-        grids_indices.append(tmp)
-
-    return grids_indices
-
-
-def get_states_grid_dense(dims_state_grid):
-
-    grids_indices = get_grids_indices(dims_state_grid)
-
-    state_grid = pd.DataFrame(
-        index=pd.MultiIndex.from_product(
-            grids_indices, names=range(dims_state_grid.size),
-        )
-    ).reset_index()
-
-    return state_grid
 
 
 def get_corner_states(dims_state_grid):
@@ -114,12 +88,12 @@ def state_from_id(index, dims_state_grid):
     return out
 
 
-def inputs_from_state(state, grids_values):
+def inputs_from_state(state, grid):
 
     inputs_tmp = []
 
     for idx, val in enumerate(state):
-        input = grids_values[idx][val]
+        input = grid[idx][val]
         inputs_tmp.append(input)
 
     inputs = np.array(object=inputs_tmp)
@@ -140,13 +114,13 @@ def states_from_ids_batch(index, dims_state_grid):
     return states
 
 
-def inputs_from_ids_batch(index, dims_state_grid, grids_values):
+def inputs_from_ids_batch(index, dims_state_grid, grid):
 
     inputs_tmp = []
 
     for _idx, val in enumerate(index):
         state = state_from_id(val, dims_state_grid)
-        input = inputs_from_state(state, grids_values)
+        input = inputs_from_state(state, grid)
         inputs_tmp.append(input)
 
     inputs = np.array(object=inputs_tmp)
@@ -157,13 +131,10 @@ def inputs_from_ids_batch(index, dims_state_grid, grids_values):
 def evaluation_batch(points, func):
 
     n_states, n_dims = points.shape
-
     out = []
 
     for idx in range(n_states):
-
         result_tmp = func(points[idx, :])
-
         out.append(result_tmp)
 
     results = np.array(object=out)
@@ -214,20 +185,24 @@ def get_not_interpolated_indicator_random(interpolation_points, n_states, seed):
     return not_interpolated
 
 
-def get_data(dims_state_grid, grids_values):
+def get_data(func, grid_size, n_vars, dims_state_grid, grid):
+
+    # filenames
+    file_states = func.__name__ + "_" + grid_size + "_" + str(n_vars) + "_points.npy"
+    file_results = func.__name__ + "_" + grid_size + "_" + str(n_vars) + "_results.npy"
 
     try:
-        states = np.load("../data/sandbox/states.npy")
-        results = np.load("../data/sandbox/results.npy")
+        points = np.load("./results/sandbox/" + file_states)
+        results = np.load("./results/sandbox/" + file_results)
     except FileNotFoundError:
         n_states = dims_state_grid.prod()
-        states_index = np.array(object=range(n_states), dtype=int)
-        states = states_from_ids_batch(states_index, dims_state_grid)
-        results = evaluation_batch(states, grids_values)
-        np.save("../data/sandbox/states", states)
-        np.save("../data/sandbox/results", results)
+        index = np.array(object=range(n_states), dtype=int)
+        points = inputs_from_ids_batch(index, dims_state_grid, grid)
+        results = evaluation_batch(points, func)
+        np.save("./results/sandbox/" + file_states, points)
+        np.save("./results/sandbox/" + file_results, results)
 
-    return states, results
+    return points, results
 
 
 def interpolate_linear(grid, func, interp_params):
@@ -247,14 +222,14 @@ def interpolate_linear(grid, func, interp_params):
     index = np.array(object=range(n_states))
 
     # generate basis points and basis results
-    grids_values = get_grids_values(dims_state_grid, grid_min, grid_max)
+    grid = get_grid(dims_state_grid, grid_min, grid_max)
     corner_states = get_corner_states(dims_state_grid)
     corner_index = states_to_ids_batch(corner_states, dims_state_grid)
     not_interpolated = get_not_interpolated_indicator_random(
         n_interpolation_points, n_states, seed
     )
     basis_index = np.unique(np.concatenate((index[not_interpolated], corner_index)))
-    basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grids_values)
+    basis_points = inputs_from_ids_batch(basis_index, dims_state_grid, grid)
     basis_results = evaluation_batch(basis_points, func)
     n_gridpoints_effective = basis_points.shape[0]
     # generate interpolator
@@ -267,7 +242,7 @@ def interpolate_linear(grid, func, interp_params):
     interpolated = np.logical_not(not_interpolated)
     index_interpolated = index[interpolated]
     states_interpolated = inputs_from_ids_batch(
-        index_interpolated, dims_state_grid, grids_values
+        index_interpolated, dims_state_grid, grid
     )
     predicted_output = interpolator.__call__(states_interpolated)
 

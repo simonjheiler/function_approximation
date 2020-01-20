@@ -12,6 +12,7 @@ sys.path.insert(
 )
 
 from src.interpolate import get_corner_states
+from src.interpolate import get_grid
 from src.interpolate import inputs_from_ids_batch
 from src.interpolate import inputs_from_state
 from src.interpolate import state_from_id
@@ -19,21 +20,16 @@ from src.interpolate import state_to_id
 from src.interpolate import states_from_ids_batch
 from src.interpolate import states_to_ids_batch
 from numpy.testing import assert_array_equal
+from numpy.testing import assert_equal
 
 # import pandas as pd
 # from pandas.testing import assert_frame_equal
 # from pandas.testing import assert_series_equal
 
-# from interpolate import get_grids_values
-# from interpolate import get_dims_state_grid
-# from interpolate import get_grids_values
-# from interpolate import get_grids_indices
-# from interpolate import get_states_grid_dense
-# from interpolate import evaluation_batch
-# from interpolate import get_not_interpolated_indicator_random
-# from interpolate import get_data
-# from interpolate import interpolate_linear
-
+# from src.interpolate import get_dims_state_grid
+# from src.interpolate import evaluation_batch
+# from src.interpolate import interpolate_linear
+# from src.interpolate import interpolate_smolyak
 
 #########################################################################
 # FIXTURES
@@ -44,7 +40,7 @@ from numpy.testing import assert_array_equal
 def setup_inputs_from_state():
     out = {}
     out["state"] = np.array([0, 0, 0])
-    out["grids_values"] = np.array(
+    out["grid"] = np.array(
         object=[[1.0, 2.0, 3.0], [4.0, 5.0], [3.0, 5.0, 6.0, 8.0, 10.0]]
     )
     return out
@@ -71,7 +67,7 @@ def setup_inputs_from_ids_batch():
     out = {}
     out["index"] = np.array(object=[0, 14, 29])
     out["dims_state_grid"] = np.array(object=[3, 2, 5])
-    out["grids_values"] = np.array(
+    out["grid"] = np.array(
         object=[[1.0, 2.0, 3.0], [4.0, 5.0], [3.0, 5.0, 6.0, 8.0, 10.0]]
     )
     return out
@@ -81,6 +77,15 @@ def setup_inputs_from_ids_batch():
 def setup_state_to_id():
     out = {}
     out["dims_state_grid"] = np.array(object=[3, 2, 5])
+    return out
+
+
+@pytest.fixture
+def setup_get_grid():
+    out = {}
+    out["dims_state_grid"] = np.array(object=[3, 2, 5])
+    out["grid_min"] = np.array([1.0, 1.0, 1.0])
+    out["grid_max"] = np.array([2.0, 2.0, 5.0])
     return out
 
 
@@ -180,3 +185,13 @@ def test_get_corner_states():
     )
     actual = get_corner_states(**setup_get_corner_states)
     assert_array_equal(actual, expected)
+
+
+def test_get_grid(setup_get_grid):
+    expected = {
+        0: np.array([1.0, 1.5, 2.0]),
+        1: np.array([1.0, 2.0]),
+        2: np.array([1.0, 2.0, 3.0, 4.0, 5.0]),
+    }
+    actual = get_grid(**setup_get_grid)
+    assert_equal(actual, expected)
