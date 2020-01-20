@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from time import time
 
-from src.functions_to_approximate import borehole
+from src.functions_to_approximate import borehole_numba as borehole
 from src.interpolate import get_data
 from src.interpolate import get_grid
 from src.interpolate import interpolate_linear
@@ -43,9 +43,9 @@ study_params = {}
 
 study_params["controls"] = {
     "load data": False,
-    "method": "linear",
-    "grid size": "medium",
-    "variables": [2, 3, 4, 5],
+    "method": "spline",
+    "grid size": "large",
+    "variables": [2],
     "function to approximate": borehole,
 }
 
