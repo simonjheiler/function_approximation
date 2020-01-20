@@ -14,13 +14,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from time import time
 
-from files.functions_to_approximate import borehole
-from files.interpolate import evaluation_batch
-from files.interpolate import get_grids_values
-from files.interpolate import inputs_from_ids_batch
-from files.interpolate import interpolate_linear
-from files.interpolate import interpolate_smolyak
-from files.interpolate import rmse as root_mean_squared_error
+from code.functions_to_approximate import borehole
+from code.interpolate import evaluation_batch
+from code.interpolate import get_grids_values
+from code.interpolate import inputs_from_ids_batch
+from code.interpolate import interpolate_linear
+from code.interpolate import interpolate_smolyak
+from code.interpolate import rmse as root_mean_squared_error
 
 # import pandas as pd
 # import numba as nb
