@@ -1,35 +1,29 @@
+import os
 import sys
+
+root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, root)
 
 import numpy as np
 import pytest
 
-sys.path.insert(
-    0,
-    (
-        "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/"
-        "topics_SBE/3_project/student-project-simonjheiler"
-    ),
-)
-
-from src.interpolate import get_corner_states
-from src.interpolate import get_grid
-from src.interpolate import inputs_from_ids_batch
-from src.interpolate import inputs_from_state
-from src.interpolate import state_from_id
-from src.interpolate import state_to_id
-from src.interpolate import states_from_ids_batch
-from src.interpolate import states_to_ids_batch
+from src.auxiliary import get_corner_states
+from src.auxiliary import get_grid
+from src.auxiliary import inputs_from_ids_batch
+from src.auxiliary import inputs_from_state
+from src.auxiliary import state_from_id
+from src.auxiliary import state_to_id
+from src.auxiliary import states_from_ids_batch
+from src.auxiliary import states_to_ids_batch
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal
 
+# from src.auxiliary import evaluation_batch
+# from src.auxiliary import get_dims_state_grid
 # import pandas as pd
 # from pandas.testing import assert_frame_equal
 # from pandas.testing import assert_series_equal
 
-# from src.interpolate import get_dims_state_grid
-# from src.interpolate import evaluation_batch
-# from src.interpolate import interpolate_linear
-# from src.interpolate import interpolate_smolyak
 
 #########################################################################
 # FIXTURES

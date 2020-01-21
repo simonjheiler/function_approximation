@@ -13,5 +13,5 @@ install:
   - source activate topics_SBE_simonjheiler
 
 script:
-  - pytest
+  - pytest ./src/
   - travis_wait python utils/travis_runner.py
