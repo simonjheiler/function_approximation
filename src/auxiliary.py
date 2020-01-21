@@ -125,20 +125,6 @@ def inputs_from_ids_batch(index, dims_state_grid, grid):
     return inputs
 
 
-def evaluation_batch(points, func):
-
-    n_states, n_dims = points.shape
-    out = []
-
-    for idx in range(n_states):
-        result_tmp = func(points[idx, :])
-        out.append(result_tmp)
-
-    results = np.array(object=out)
-
-    return results
-
-
 def states_to_ids_batch(states, dims_state_grid):
 
     n_states, _ = states.shape
@@ -164,7 +150,7 @@ def get_data(func, grid_size, n_vars, dims_state_grid, grid):
         n_states = dims_state_grid.prod()
         index = np.array(object=range(n_states), dtype=int)
         points = inputs_from_ids_batch(index, dims_state_grid, grid)
-        results = evaluation_batch(points, func)
+        results = func(points)
         # np.save("./results/sandbox/" + file_states, points)
         # np.save("./results/sandbox/" + file_results, results)
 

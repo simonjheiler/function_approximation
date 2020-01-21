@@ -24,7 +24,7 @@ from src.parameters import interp_params
 study_params["controls"] = {
     "load data": False,
     "method": "smolyak",
-    "grid size": "large",
+    "grid size": "small",
     "variables": [2, 3],
     "function to approximate": borehole,
 }

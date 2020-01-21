@@ -37,6 +37,10 @@ study_params["grid"] = {
         object=[115600.0, 1110.0, 820.0, 50000.0, 0.15, 1680.0, 15000.0, 116.0],
         dtype=float,
     ),
+    "input default": np.array(
+        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55],
+        dtype=float,
+    ),
     "n_gridpoints": {"small": 5, "medium": 10, "large": 100},
 }
 

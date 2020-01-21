@@ -18,7 +18,6 @@ from src.auxiliary import states_to_ids_batch
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal
 
-# from src.auxiliary import evaluation_batch
 # from src.auxiliary import get_dims_state_grid
 # import pandas as pd
 # from pandas.testing import assert_frame_equal
