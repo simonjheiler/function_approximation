@@ -13,10 +13,5 @@ install:
   - source activate topics_SBE_simonjheiler
 
 script:
-   # This automatically executes all notebooks (*.ipynb)
-   # in the root directory. If you only want to execute
-   # selected notebooks or notebooks in subdirectories,
-   # please go ahead and edit the file to meet your
-   # needs.
-   - pytest src/
-   - travis_wait python utils/travis_runner.py
+  - pytest
+  - travis_wait python utils/travis_runner.py
