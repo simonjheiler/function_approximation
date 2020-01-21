@@ -4,7 +4,7 @@
 
 ## Notebook viewer
 
-<a href="https://nbviewer.jupyter.org/github/HumanCapitalAnalysis/student-project-simonjheiler/master/student_project.ipynb"
+<a href="https://nbviewer.jupyter.org/github/HumanCapitalAnalysis/student-project-simonjheiler/blob/master/student_project.ipynb"
    target="_parent">
    <img align="center"
   src="https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.png"
