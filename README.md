@@ -18,6 +18,10 @@ Current build status (Travis CI):
 
 [![Build Status](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler.svg?branch=master)](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler)
 
+Under CI control:
+* testing harness (tests contained in ./src/)
+* notebooks
+
 
 ## Structure of notebook
 
