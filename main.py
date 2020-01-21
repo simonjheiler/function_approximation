@@ -25,7 +25,7 @@ study_params["controls"] = {
     "load data": False,
     "method": "smolyak",
     "grid size": "large",
-    "variables": [2],
+    "variables": [2, 3],
     "function to approximate": borehole,
 }
 
@@ -40,12 +40,7 @@ if not study_params["controls"]["load data"]:
     method = study_params["controls"]["method"]
     func = study_params["controls"]["function to approximate"]
     grid_size = study_params["controls"]["grid size"]
-    if method == "linear":
-        iterations = study_params["linear"]["interpolation_points"]
-    elif method == "smolyak":
-        iterations = study_params["smolyak"]["mu"]
-    elif method == "spline":
-        iterations = study_params["spline"]["interpolation_points"]
+    iterations = study_params[method]["iterations"]
     interpolator = study_params[method]["interpolator"]
 
     # initiate dict to store results
@@ -72,13 +67,13 @@ if not study_params["controls"]["load data"]:
         n_gridpoints_effective_tmp = []
 
         # iterate over settings
-        for iteration in range(len(iterations)):
+        for iteration in range(iterations):
             print(f"dimension: {n_vars}; iteration: {iteration + 1}")
 
             # adjust interpolation parameters
             if study_params["controls"]["method"] == "linear":
                 interp_params["linear"]["interpolation_points"] = study_params[
-                    "spline"
+                    "linear"
                 ]["interpolation_points"][iteration]
             elif study_params["controls"]["method"] == "spline":
                 interp_params["spline"]["interpolation_points"] = study_params[

@@ -60,8 +60,8 @@ def interpolate_linear(grid, func, interp_params):
 
     # load interpolation parameters
     seed = interp_params["linear"]["seed"]
-    n_interpolation_points = interp_params["linear"]["n_interpolation_points"]
     interpolation_points = interp_params["linear"]["interpolation_points"]
+    n_interpolation_points = interp_params["linear"]["n_interpolation_points"]
     grid_method = interp_params["linear"]["grid_method"]
 
     # get number of states, number of dimensions and index of states

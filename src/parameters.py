@@ -10,7 +10,7 @@ interp_params = {}
 interp_params["linear"] = {}
 interp_params["linear"]["seed"] = 123
 interp_params["linear"]["grid_method"] = "regular"
-interp_params["linear"]["n_interpolation_points"] = 0
+interp_params["linear"]["interpolation_points"] = 3
 interp_params["smolyak"] = {}
 interp_params["smolyak"]["mu"] = 1
 interp_params["spline"] = {}
@@ -44,12 +44,15 @@ study_params["linear"] = {
     "interpolator": interpolate_linear,
     "share_not_interpolated": [0.0, 0.2, 0.4],
     "interpolation_points": [2, 3, 5, 7, 9, 11],
+    "iterations": 3,
 }
 study_params["smolyak"] = {
     "interpolator": interpolate_smolyak,
     "mu": [1, 2, 3],
+    "iterations": 3,
 }
 study_params["spline"] = {
     "interpolator": interpolate_spline,
     "interpolation_points": [2, 3, 5, 7, 9, 11],
+    "iterations": 3,
 }
