@@ -201,8 +201,8 @@ def get_data(func, grid_size, n_vars, dims_state_grid, grid):
         index = np.array(object=range(n_states), dtype=int)
         points = inputs_from_ids_batch(index, dims_state_grid, grid)
         results = evaluation_batch(points, func)
-        np.save("./results/sandbox/" + file_states, points)
-        np.save("./results/sandbox/" + file_results, results)
+        # np.save("./results/sandbox/" + file_states, points)
+        # np.save("./results/sandbox/" + file_results, results)
 
     return points, results
 
