@@ -14,6 +14,9 @@ import numpy as np
 #########################################################################
 
 
+# BOREHOLE FUNCTION
+
+
 def borehole_readable(input):
     """Calculate the flow through a borehole given *inputs*.
 
@@ -154,6 +157,9 @@ def borehole_jit(input):
     return output
 
 
+# ZHOU (1998) FUNCTION
+
+
 def zhou_phi(input):
 
     d = len(input)
@@ -177,5 +183,32 @@ def zhou_readable(input):
         output.append(output_tmp)
 
     output = np.array(object=output)
+
+    return output
+
+
+def zhou_phi_vectorize(input):
+
+    d = input.shape[1]
+    phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input, axis=1) ** 2)
+
+    return phi
+
+
+def zhou_vectorize(input):
+
+    d = input.shape[1]
+
+    output = (
+        10 ** d
+        / 2
+        * (
+            zhou_phi_vectorize(10 * (input - [1 / 3] * d))
+            + zhou_phi_vectorize(10 * (input - [2 / 3] * d))
+        )
+    )
+
+    # pdb.set_trace()
+    output = np.array(object=output, dtype=float)
 
     return output

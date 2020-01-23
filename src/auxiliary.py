@@ -183,6 +183,32 @@ def mse(x1, x2, axis=0):
     return np.mean((x1 - x2) ** 2, axis=axis)
 
 
+def msre(x1, x2, axis=0):
+    """Calculate mean squared relative error.
+
+    If ``x1`` and ``x2`` have different shapes, then they need to broadcast. This uses
+    :func:`numpy.asanyarray` to convert the input. Whether this is the desired result or
+    not depends on the array subclass, for example NumPy matrices will silently
+    produce an incorrect result.
+
+    Parameters
+    ----------
+    x1, x2 : array_like
+       The performance measure depends on the difference between these two arrays.
+    axis : int
+       Axis along which the summary statistic is calculated
+
+    Returns
+    -------
+    mse : numpy.ndarray or float
+       Mean squared relative error along given axis.
+
+    """
+    x1 = np.asanyarray(x1)
+    x2 = np.asanyarray(x2)
+    return np.mean(((x1 - x2) / x1) ** 2, axis=axis)
+
+
 def rmse(x1, x2, axis=0):
     """Calculate root mean squared error.
 
@@ -207,3 +233,29 @@ def rmse(x1, x2, axis=0):
     x1 = np.asanyarray(x1)
     x2 = np.asanyarray(x2)
     return np.sqrt(mse(x1, x2, axis=axis))
+
+
+def rmsre(x1, x2, axis=0):
+    """Calculate root mean squared error.
+
+    If ``x1`` and ``x2`` have different shapes, then they need to broadcast. This uses
+    :func:`numpy.asanyarray` to convert the input. Whether this is the desired result or
+    not depends on the array subclass, for example NumPy matrices will silently
+    produce an incorrect result.
+
+    Parameters
+    ----------
+    x1, x2 : array_like
+       The performance measure depends on the difference between these two arrays.
+    axis : int
+       Axis along which the summary statistic is calculated.
+
+    Returns
+    -------
+    rmse : numpy.ndarray or float
+       Root mean squared error along given axis.
+
+    """
+    x1 = np.asanyarray(x1)
+    x2 = np.asanyarray(x2)
+    return np.sqrt(msre(x1, x2, axis=axis))

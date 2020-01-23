@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from time import time
 
-from src.functions_to_approximate import borehole_numba as borehole
+from src.functions_to_approximate import borehole_numba as borehole  # noqa:F401
+from src.functions_to_approximate import zhou_readable as zhou  # noqa:F401
 from src.auxiliary import get_data
 from src.auxiliary import get_grid
-from src.auxiliary import rmse as root_mean_squared_error
+from src.auxiliary import rmsre as root_mean_squared_relative_error
 from src.parameters import study_params
 from src.parameters import interp_params
 
@@ -23,10 +24,10 @@ from src.parameters import interp_params
 
 study_params["controls"] = {
     "load data": False,
-    "method": "smolyak",
+    "method": "linear",
     "grid size": "small",
-    "variables": [2, 3],
-    "function to approximate": borehole,
+    "variables": [2, 3, 4, 5, 6],
+    "function to approximate": zhou,
 }
 
 
@@ -50,9 +51,9 @@ if not study_params["controls"]["load data"]:
     for n_vars in study_params["controls"]["variables"]:
 
         # generate grid
-        n_gridpoints = study_params["grid"]["n_gridpoints"][grid_size]
-        grid_min = study_params["grid"]["lower bounds"][:n_vars]
-        grid_max = study_params["grid"]["upper bounds"][:n_vars]
+        n_gridpoints = study_params["grid"]["zhou"]["n_gridpoints"][grid_size]
+        grid_min = study_params["grid"]["zhou"]["lower bounds"][:n_vars]
+        grid_max = study_params["grid"]["zhou"]["upper bounds"][:n_vars]
         dims_state_grid = np.array(object=[n_gridpoints] * n_vars, dtype=int,)
         n_states = dims_state_grid.prod()
         grid = get_grid(dims_state_grid, grid_min, grid_max)
@@ -92,7 +93,7 @@ if not study_params["controls"]["load data"]:
             stop = time()
 
             # assess interpolation accuracy
-            rmse_iter = root_mean_squared_error(results_interp, results_calc)
+            rmse_iter = root_mean_squared_relative_error(results_interp, results_calc)
 
             # print and store results
             print("root mean squared error: " + method + f" {rmse_iter}")

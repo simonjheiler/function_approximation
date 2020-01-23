@@ -12,7 +12,9 @@ from src.functions_to_approximate import borehole_numba
 from src.functions_to_approximate import borehole_readable
 from src.functions_to_approximate import borehole_vectorize
 from src.functions_to_approximate import zhou_phi
+from src.functions_to_approximate import zhou_phi_vectorize
 from src.functions_to_approximate import zhou_readable
+from src.functions_to_approximate import zhou_vectorize
 from src.parameters import study_params
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
@@ -23,6 +25,9 @@ from numpy.testing import assert_array_almost_equal
 #########################################################################
 # FIXTURES
 #########################################################################
+
+
+# BOREHOLE FUNCTION
 
 
 @pytest.fixture
@@ -51,8 +56,8 @@ def setup_borehole_truncated_input():
 @pytest.fixture
 def setup_borehole_large_set():
 
-    grid_min = study_params["grid"]["lower bounds"]
-    grid_max = study_params["grid"]["upper bounds"]
+    grid_min = study_params["grid"]["borehole"]["lower bounds"]
+    grid_max = study_params["grid"]["borehole"]["upper bounds"]
 
     np.random.seed(121)
 
@@ -67,6 +72,9 @@ def setup_borehole_large_set():
     )
 
     return out
+
+
+# ZHOU (1998) FUNCTION
 
 
 @pytest.fixture
@@ -91,9 +99,33 @@ def setup_zhou_phi_on_domain():
     return out
 
 
+@pytest.fixture
+def setup_zhou_large_set():
+
+    grid_min = study_params["grid"]["zhou"]["lower bounds"]
+    grid_max = study_params["grid"]["zhou"]["upper bounds"]
+
+    np.random.seed(121)
+
+    input = []
+    for _ in range(10000):
+        input_tmp = np.random.uniform(0.0, 1.0, len(grid_min))
+        input.append(input_tmp)
+
+    out = {}
+    out["input"] = (
+        input * grid_min + (np.ones((10000, len(grid_min))) - input) * grid_max
+    )
+
+    return out
+
+
 #########################################################################
 # TESTS
 #########################################################################
+
+
+# BOREHOLE FUNCTION
 
 
 def test_borehole_readable_on_domain(setup_borehole_on_domain):
@@ -180,6 +212,9 @@ def test_borehole_numba_equals_vectorize(setup_borehole_large_set):
     assert_array_almost_equal(actual_numba, actual_vectorize, decimal=12)
 
 
+# ZHOU (1998) FUNCTION
+
+
 def test_zhou_phi_on_domain(setup_zhou_phi_on_domain):
     expected = (2 * np.pi) ** (-4) * np.exp(-0.25)
     actual = zhou_phi(**setup_zhou_phi_on_domain)
@@ -192,13 +227,49 @@ def test_zhou_readable_on_domain(setup_zhou_on_domain):
             0.5
             * 10 ** 8
             * (2 * np.pi) ** (-4)
-            * (1 + np.exp(-0.5 * np.linalg.norm(10) ** 2)),
+            * (1 + np.exp(-0.5 * 8 * (10 / 3) ** 2)),
             0.5
             * 10 ** 8
             * (2 * np.pi) ** (-4)
-            * (np.exp(-0.5 * np.linalg.norm(10) ** 2) + 1),
+            * (np.exp(-0.5 * 8 * (10 / 3) ** 2) + 1),
         ],
         dtype=float,
     )
     actual = zhou_readable(**setup_zhou_on_domain)
     assert_array_equal(actual, expected)
+
+
+def test_zhou_phi_vectorize(setup_zhou_on_domain):
+    expected = np.array(
+        object=[
+            (2 * np.pi) ** (-4) * np.exp(-0.5 * 8 / 9),
+            (2 * np.pi) ** (-4) * np.exp(-0.5 * 32 / 9),
+        ],
+        dtype=float,
+    )
+    actual = zhou_phi_vectorize(**setup_zhou_on_domain)
+    assert_array_equal(actual, expected)
+
+
+def test_zhou_vectorize(setup_zhou_on_domain):
+    expected = np.array(
+        object=[
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (1 + np.exp(-0.5 * 8 * (10 / 3) ** 2)),
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (np.exp(-0.5 * 8 * (10 / 3) ** 2) + 1),
+        ],
+        dtype=float,
+    )
+    actual = zhou_vectorize(**setup_zhou_on_domain)
+    assert_array_equal(actual, expected)
+
+
+def test_zhou_readable_equals_vectorize(setup_zhou_large_set):
+    actual_readable = zhou_readable(**setup_zhou_large_set)
+    actual_vectorize = zhou_vectorize(**setup_zhou_large_set)
+    assert_array_almost_equal(actual_readable, actual_vectorize, decimal=12)
