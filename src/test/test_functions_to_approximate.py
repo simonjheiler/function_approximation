@@ -74,8 +74,8 @@ def setup_zhou_on_domain():
     out = {}
     out["input"] = np.array(
         object=[
-            [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-            [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            [1 / 3, 1 / 3, 1 / 3, 1 / 3, 1 / 3, 1 / 3, 1 / 3, 1 / 3],
+            [2 / 3, 2 / 3, 2 / 3, 2 / 3, 2 / 3, 2 / 3, 2 / 3, 2 / 3],
         ],
         dtype=float,
     )
@@ -187,6 +187,18 @@ def test_zhou_phi_on_domain(setup_zhou_phi_on_domain):
 
 
 def test_zhou_readable_on_domain(setup_zhou_on_domain):
-    expected = np.array(object=[1.0, 1.0], dtype=float,)
+    expected = np.array(
+        object=[
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (1 + np.exp(-0.5 * np.linalg.norm(10) ** 2)),
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (np.exp(-0.5 * np.linalg.norm(10) ** 2) + 1),
+        ],
+        dtype=float,
+    )
     actual = zhou_readable(**setup_zhou_on_domain)
     assert_array_equal(actual, expected)
