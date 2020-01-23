@@ -152,3 +152,30 @@ def borehole_jit(input):
     )
 
     return output
+
+
+def zhou_phi(input):
+
+    d = len(input)
+    phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input) ** 2)
+
+    return phi
+
+
+def zhou_readable(input):
+
+    d = input.shape[1]
+
+    output = []
+    for idx in range(input.shape[0]):
+        x = input[idx, :]
+        output_tmp = (
+            10 ** d
+            / 2
+            * (zhou_phi(10 * (x - [1 / 3] * d)) + zhou_phi(10 * (x - [2 / 3] * d)))
+        )
+        output.append(output_tmp)
+
+    output = np.array(object=output)
+
+    return output

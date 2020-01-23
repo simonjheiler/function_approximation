@@ -11,6 +11,8 @@ import pytest
 from src.functions_to_approximate import borehole_numba
 from src.functions_to_approximate import borehole_readable
 from src.functions_to_approximate import borehole_vectorize
+from src.functions_to_approximate import zhou_phi
+from src.functions_to_approximate import zhou_readable
 from src.parameters import study_params
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
@@ -64,6 +66,28 @@ def setup_borehole_large_set():
         input * grid_min + (np.ones((10000, len(grid_min))) - input) * grid_max
     )
 
+    return out
+
+
+@pytest.fixture
+def setup_zhou_on_domain():
+    out = {}
+    out["input"] = np.array(
+        object=[
+            [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+            [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        ],
+        dtype=float,
+    )
+    return out
+
+
+@pytest.fixture
+def setup_zhou_phi_on_domain():
+    out = {}
+    out["input"] = np.array(
+        object=[0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], dtype=float,
+    )
     return out
 
 
@@ -154,3 +178,15 @@ def test_borehole_numba_equals_vectorize(setup_borehole_large_set):
     actual_numba = borehole_numba(**setup_borehole_large_set)
     actual_vectorize = borehole_vectorize(**setup_borehole_large_set)
     assert_array_almost_equal(actual_numba, actual_vectorize, decimal=12)
+
+
+def test_zhou_phi_on_domain(setup_zhou_phi_on_domain):
+    expected = (2 * np.pi) ** (-4) * np.exp(-0.25)
+    actual = zhou_phi(**setup_zhou_phi_on_domain)
+    assert actual == expected
+
+
+def test_zhou_readable_on_domain(setup_zhou_on_domain):
+    expected = np.array(object=[1.0, 1.0], dtype=float,)
+    actual = zhou_readable(**setup_zhou_on_domain)
+    assert_array_equal(actual, expected)
