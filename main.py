@@ -11,12 +11,15 @@ import numpy as np
 from time import time
 
 from src.functions_to_approximate import borehole_numba as borehole  # noqa:F401
-from src.functions_to_approximate import zhou_readable as zhou  # noqa:F401
-from src.auxiliary import get_data
+from src.functions_to_approximate import zhou_vectorize as zhou  # noqa:F401
 from src.auxiliary import get_grid
-from src.auxiliary import rmsre as root_mean_squared_relative_error
+from src.auxiliary import get_interpolation_points
+from src.auxiliary import rmse as root_mean_squared_error
 from src.parameters import study_params
 from src.parameters import interp_params
+
+# from src.auxiliary import get_data
+# from src.auxiliary import rmse as root_mean_squared_error
 
 #########################################################################
 # PARAMETERS
@@ -24,10 +27,12 @@ from src.parameters import interp_params
 
 study_params["controls"] = {
     "load data": False,
-    "method": "linear",
-    "grid size": "small",
-    "variables": [2, 3, 4, 5, 6],
+    "method": "smolyak",
+    "grid size": "medium",
+    "variables": [2, 3, 4, 5, 6, 7, 8],
     "function to approximate": zhou,
+    "number of points for accuracy check": 1000,
+    "seed for accuracy check": 123,
 }
 
 
@@ -43,6 +48,10 @@ if not study_params["controls"]["load data"]:
     grid_size = study_params["controls"]["grid size"]
     iterations = study_params[method]["iterations"]
     interpolator = study_params[method]["interpolator"]
+    n_interpolation_points = study_params["controls"][
+        "number of points for accuracy check"
+    ]
+    accuracy_check_seed = study_params["controls"]["seed for accuracy check"]
 
     # initiate dict to store results
     results = {}
@@ -59,8 +68,13 @@ if not study_params["controls"]["load data"]:
         grid = get_grid(dims_state_grid, grid_min, grid_max)
         index = np.array(object=range(n_states))
 
-        # load or calculate actuals
-        _, results_calc = get_data(func, grid_size, n_vars, dims_state_grid, grid)
+        # get interpolation points
+        interpolation_points = get_interpolation_points(
+            n_interpolation_points, grid, accuracy_check_seed,
+        )
+
+        # get results on interpolation points
+        results_calc = func(interpolation_points)
 
         # initiate objects to store results
         rmse_tmp = []
@@ -88,12 +102,12 @@ if not study_params["controls"]["load data"]:
             # interpolate and capture computation time
             start = time()
             results_interp, n_gridpoints_effective = interpolator(
-                grid, func, interp_params
+                interpolation_points, grid, func, interp_params
             )
             stop = time()
 
             # assess interpolation accuracy
-            rmse_iter = root_mean_squared_relative_error(results_interp, results_calc)
+            rmse_iter = root_mean_squared_error(results_interp, results_calc)
 
             # print and store results
             print("root mean squared error: " + method + f" {rmse_iter}")

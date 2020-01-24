@@ -7,12 +7,11 @@ from interpolation.smolyak.grid import SmolyakGrid as sg
 from interpolation.smolyak.interp import SmolyakInterp as si
 from interpolation.splines import CubicSpline as spline
 
-from src.auxiliary import get_dims_state_grid
-from src.auxiliary import get_grid
-from src.auxiliary import inputs_from_ids_batch
-
 # from interpolation.multilinear.mlinterp import mlinterp
 # from src.auxiliary import get_corner_states
+# from src.auxiliary import get_dims_state_grid
+# from src.auxiliary import get_grid
+# from src.auxiliary import inputs_from_ids_batch
 # from src.auxiliary import states_to_ids_batch
 
 # import numba as nb
@@ -54,38 +53,22 @@ def get_not_interpolated_indicator_random(interpolation_points, n_states, seed):
     return not_interpolated
 
 
-def interpolate_linear(grid, func, interp_params):
+def interpolate_linear(points, grid, func, interp_params):
 
     # load interpolation parameters
     interpolation_points = interp_params["linear"]["interpolation_points"]
-    # grid_method = interp_params["linear"]["grid_method"]
 
     # get number of states, number of dimensions and index of states
     n_dims = len(grid)
-    n_gridpoints = np.array(object=[len(v) for _, v in grid.items()])
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
 
-    dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
-    n_states = dims_state_grid.prod()
-    index = np.array(object=range(n_states))
+    # generate regular interpolation grid and number of interpolation points
+    grid_interp, n_gridpoints_effective = get_interpolation_grid(
+        n_dims, grid_min, grid_max, interpolation_points
+    )
 
-    # generate full grid
-    grid = get_grid(dims_state_grid, grid_min, grid_max)
-
-    # generate regular interpolation grid
-    grid_interp = []
-    for idx in range(n_dims):
-        grid_dim = np.linspace(grid_min[idx], grid_max[idx], interpolation_points,)
-        grid_interp.append(grid_dim)
-
-    grid_interp = pd.DataFrame(
-        index=pd.MultiIndex.from_product(grid_interp, names=range(n_dims),)
-    ).reset_index()
-    grid_interp = np.array(object=grid_interp)
-
-    # evaluate function on grid and store number of interpolation points
-    n_gridpoints_effective = grid_interp.shape[0]
+    # evaluate function on grid
     f_on_grid = func(grid_interp)
 
     # generate interpolator
@@ -94,26 +77,20 @@ def interpolate_linear(grid, func, interp_params):
     )
 
     # calculate interpolated points
-    states_interpolated = inputs_from_ids_batch(index, dims_state_grid, grid)
-    results_interp = interpolator.__call__(states_interpolated)
+    results_interp = interpolator.__call__(points)
 
     return results_interp, n_gridpoints_effective
 
 
-def interpolate_smolyak(grid, func, interp_params):
+def interpolate_smolyak(points, grid, func, interp_params):
 
     # load interpolation parameters
     mu = interp_params["smolyak"]["mu"]
 
     # get number of states, number of dimensions and index of states
     n_dims = len(grid)
-    n_gridpoints = np.array(object=[len(v) for _, v in grid.items()])
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
-
-    dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
-    n_states = dims_state_grid.prod()
-    index = np.array(object=range(n_states))
 
     # generate smolyak grid
     s_grid = sg(n_dims, mu, grid_min, grid_max)
@@ -127,38 +104,26 @@ def interpolate_smolyak(grid, func, interp_params):
     interpolator = si(s_grid, f_on_grid)
 
     # calculate interpolated points
-    states_interpolated = inputs_from_ids_batch(index, dims_state_grid, grid)
-    results_interp = interpolator.interpolate(states_interpolated)
+    results_interp = interpolator.interpolate(points)
 
     return results_interp, n_gridpoints_effective
 
 
-def interpolate_spline(grid, func, interp_params):
+def interpolate_spline(points, grid, func, interp_params):
 
     # load interpolation parameters
     interpolation_points = interp_params["spline"]["interpolation_points"]
 
     # get number of states, number of dimensions and index of states
     n_dims = len(grid)
-    n_gridpoints = np.array(object=[len(v) for _, v in grid.items()])
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
-
-    dims_state_grid = get_dims_state_grid(n_dims, n_gridpoints)
-    n_states = dims_state_grid.prod()
-    index = np.array(object=range(n_states))
     orders = [interpolation_points] * n_dims
 
-    # generate grid
-    grid_interp = []
-    for idx in range(n_dims):
-        grid_tmp = np.linspace(grid_min[idx], grid_max[idx], interpolation_points,)
-        grid_interp.append(grid_tmp)
-    grid_interp = pd.DataFrame(
-        index=pd.MultiIndex.from_product(grid_interp, names=range(n_dims),)
-    ).reset_index()
-    grid_interp = np.array(object=grid_interp)
-    n_gridpoints_effective, _ = grid_interp.shape
+    # generate regular interpolation grid and number of interpolation points
+    grid_interp, n_gridpoints_effective = get_interpolation_grid(
+        n_dims, grid_min, grid_max, interpolation_points
+    )
 
     # evaluate function on grid
     f_on_grid = func(grid_interp)
@@ -167,7 +132,22 @@ def interpolate_spline(grid, func, interp_params):
     interpolator = spline(grid_min, grid_max, orders, f_on_grid)
 
     # calculate interpolated points
-    states_interpolated = inputs_from_ids_batch(index, dims_state_grid, grid)
-    results_interp = interpolator(states_interpolated)
+    results_interp = interpolator(points)
 
     return results_interp, n_gridpoints_effective
+
+
+def get_interpolation_grid(n_dims, grid_min, grid_max, interpolation_points):
+
+    grid_interp = []
+    for idx in range(n_dims):
+        grid_dim = np.linspace(grid_min[idx], grid_max[idx], interpolation_points)
+        grid_interp.append(grid_dim)
+
+    grid_interp = pd.DataFrame(
+        index=pd.MultiIndex.from_product(grid_interp, names=range(n_dims))
+    ).reset_index()
+    grid_interp = np.array(object=grid_interp)
+    n_gridpoints_effective = grid_interp.shape[0]
+
+    return grid_interp, n_gridpoints_effective

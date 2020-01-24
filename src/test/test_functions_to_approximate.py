@@ -105,8 +105,7 @@ def setup_zhou_large_set():
     grid_min = study_params["grid"]["zhou"]["lower bounds"]
     grid_max = study_params["grid"]["zhou"]["upper bounds"]
 
-    np.random.seed(121)
-
+    np.random.seed(123)
     input = []
     for _ in range(10000):
         input_tmp = np.random.uniform(0.0, 1.0, len(grid_min))

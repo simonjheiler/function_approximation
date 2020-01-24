@@ -11,12 +11,17 @@ from src.auxiliary import get_corner_states
 from src.auxiliary import get_grid
 from src.auxiliary import inputs_from_ids_batch
 from src.auxiliary import inputs_from_state
+from src.auxiliary import mse
+from src.auxiliary import msre
+from src.auxiliary import rmse
+from src.auxiliary import rmsre
 from src.auxiliary import state_from_id
 from src.auxiliary import state_to_id
 from src.auxiliary import states_from_ids_batch
 from src.auxiliary import states_to_ids_batch
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal
+from numpy.testing import assert_almost_equal
 
 # from src.auxiliary import get_dims_state_grid
 # import pandas as pd
@@ -79,6 +84,14 @@ def setup_get_grid():
     out["dims_state_grid"] = np.array(object=[3, 2, 5])
     out["grid_min"] = np.array([1.0, 1.0, 1.0])
     out["grid_max"] = np.array([2.0, 2.0, 5.0])
+    return out
+
+
+@pytest.fixture
+def setup_approximation_error():
+    out = {}
+    out["x1"] = np.array(object=[0.1, 0.2, 0.3], dtype=float)
+    out["x2"] = np.array(object=[0.2, 0.4, 0.5], dtype=float)
     return out
 
 
@@ -188,3 +201,27 @@ def test_get_grid(setup_get_grid):
     }
     actual = get_grid(**setup_get_grid)
     assert_equal(actual, expected)
+
+
+def test_mse(setup_approximation_error):
+    expected = np.mean([0.01, 0.04, 0.04])
+    actual = mse(**setup_approximation_error)
+    assert_almost_equal(actual, expected, decimal=12)
+
+
+def test_msre(setup_approximation_error):
+    expected = np.mean([0.01 / 0.1, 0.04 / 0.2, 0.04 / 0.3])
+    actual = msre(**setup_approximation_error)
+    assert_almost_equal(actual, expected, decimal=12)
+
+
+def test_rmse(setup_approximation_error):
+    expected = np.sqrt(0.03)
+    actual = rmse(**setup_approximation_error)
+    assert_almost_equal(actual, expected, decimal=12)
+
+
+def test_rmsre(setup_approximation_error):
+    expected = np.sqrt(2.6 / 18)
+    actual = rmsre(**setup_approximation_error)
+    assert_almost_equal(actual, expected, decimal=12)

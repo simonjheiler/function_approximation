@@ -206,7 +206,7 @@ def msre(x1, x2, axis=0):
     """
     x1 = np.asanyarray(x1)
     x2 = np.asanyarray(x2)
-    return np.mean(((x1 - x2) / x1) ** 2, axis=axis)
+    return np.mean((((x1 - x2) ** 2) / x1), axis=axis)
 
 
 def rmse(x1, x2, axis=0):
@@ -259,3 +259,27 @@ def rmsre(x1, x2, axis=0):
     x1 = np.asanyarray(x1)
     x2 = np.asanyarray(x2)
     return np.sqrt(msre(x1, x2, axis=axis))
+
+
+def get_interpolation_points(n_interpolation_points, grid, seed):
+
+    np.random.seed(seed)
+
+    grid_min = np.array(object=[min(v) for _, v in grid.items()])
+    grid_max = np.array(object=[max(v) for _, v in grid.items()])
+
+    points = []
+
+    for _ in range(n_interpolation_points):
+        tmp = np.random.uniform(0.0, 1.0, len(grid_min))
+        points.append(tmp)
+
+    interpolation_points = np.array(
+        object=(
+            points * grid_min
+            + (np.ones((n_interpolation_points, len(grid_min))) - points) * grid_max
+        ),
+        dtype=float,
+    )
+
+    return interpolation_points
