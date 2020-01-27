@@ -7,6 +7,10 @@ from interpolation.smolyak.grid import SmolyakGrid as sg
 from interpolation.smolyak.interp import SmolyakInterp as si
 from interpolation.splines import CubicSpline as spline
 
+from src.pysg import sparseGrid
+
+# from src.pysg import generatePoints
+
 # from interpolation.multilinear.mlinterp import mlinterp
 # from src.auxiliary import get_corner_states
 # from src.auxiliary import get_dims_state_grid
@@ -20,6 +24,56 @@ from interpolation.splines import CubicSpline as spline
 #########################################################################
 # FUNCTIONS
 #########################################################################
+
+
+def get_interpolation_grid_regular(n_dims, grid_min, grid_max, interp_params):
+
+    # load interpolation parameters
+    interpolation_points = interp_params["linear"]["interpolation_points"]
+
+    # generate grid
+    grid_interp = []
+    for idx in range(n_dims):
+        grid_dim = np.linspace(grid_min[idx], grid_max[idx], interpolation_points)
+        grid_interp.append(grid_dim)
+
+    grid_interp = pd.DataFrame(
+        index=pd.MultiIndex.from_product(grid_interp, names=range(n_dims))
+    ).reset_index()
+
+    # transform to np.array
+    grid_interp = np.array(object=grid_interp)
+    n_gridpoints_effective = grid_interp.shape[0]
+
+    return grid_interp, n_gridpoints_effective
+
+
+def get_interpolation_grid_sparse(n_dims, grid_min, grid_max, interp_params):
+
+    # load interpolation parameters
+    level = interp_params["linear"]["sparse_grid_levels"]
+
+    # generate grid
+    sparse_grid = sparseGrid(n_dims, level)
+    sparse_grid.generatePoints()
+
+    grid_interp = []
+    for i in range(len(sparse_grid.indices)):
+        # for j in range(len(sparse_grid.gP[tuple(sparse_grid.indices[i])].pos)):
+        grid_interp_tmp = sparse_grid.gP[tuple(sparse_grid.indices[i])].pos
+        grid_interp.append(grid_interp_tmp)
+
+    # transform to support and store as np.array
+    grid_interp = np.array(
+        object=(
+            grid_interp * grid_min
+            + (np.ones((len(grid_interp), len(grid_min))) - grid_interp) * grid_max
+        ),
+        dtype=float,
+    )
+    n_gridpoints_effective = grid_interp.shape[0]
+
+    return grid_interp, n_gridpoints_effective
 
 
 def get_not_interpolated_indicator_random(interpolation_points, n_states, seed):
@@ -55,18 +109,20 @@ def get_not_interpolated_indicator_random(interpolation_points, n_states, seed):
 
 def interpolate_linear(points, grid, func, interp_params):
 
-    # load interpolation parameters
-    interpolation_points = interp_params["linear"]["interpolation_points"]
-
     # get number of states, number of dimensions and index of states
     n_dims = len(grid)
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
 
-    # generate regular interpolation grid and number of interpolation points
-    grid_interp, n_gridpoints_effective = get_interpolation_grid(
-        n_dims, grid_min, grid_max, interpolation_points
-    )
+    # generate interpolation grid and number of interpolation points
+    if interp_params["linear"]["grid_method"] == "regular":
+        grid_interp, n_gridpoints_effective = get_interpolation_grid_regular(
+            n_dims, grid_min, grid_max, interp_params
+        )
+    elif interp_params["linear"]["grid_method"] == "sparse":
+        grid_interp, n_gridpoints_effective = get_interpolation_grid_sparse(
+            n_dims, grid_min, grid_max, interp_params
+        )
 
     # evaluate function on grid
     f_on_grid = func(grid_interp)
@@ -120,10 +176,15 @@ def interpolate_spline(points, grid, func, interp_params):
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
     orders = [interpolation_points] * n_dims
 
-    # generate regular interpolation grid and number of interpolation points
-    grid_interp, n_gridpoints_effective = get_interpolation_grid(
-        n_dims, grid_min, grid_max, interpolation_points
-    )
+    # generate interpolation grid and number of interpolation points
+    if interp_params["spline"]["grid_method"] == "regular":
+        grid_interp, n_gridpoints_effective = get_interpolation_grid_regular(
+            n_dims, grid_min, grid_max, interp_params
+        )
+    elif interp_params["spline"]["grid_method"] == "sparse":
+        grid_interp, n_gridpoints_effective = get_interpolation_grid_sparse(
+            n_dims, grid_min, grid_max, interp_params
+        )
 
     # evaluate function on grid
     f_on_grid = func(grid_interp)
@@ -135,19 +196,3 @@ def interpolate_spline(points, grid, func, interp_params):
     results_interp = interpolator(points)
 
     return results_interp, n_gridpoints_effective
-
-
-def get_interpolation_grid(n_dims, grid_min, grid_max, interpolation_points):
-
-    grid_interp = []
-    for idx in range(n_dims):
-        grid_dim = np.linspace(grid_min[idx], grid_max[idx], interpolation_points)
-        grid_interp.append(grid_dim)
-
-    grid_interp = pd.DataFrame(
-        index=pd.MultiIndex.from_product(grid_interp, names=range(n_dims))
-    ).reset_index()
-    grid_interp = np.array(object=grid_interp)
-    n_gridpoints_effective = grid_interp.shape[0]
-
-    return grid_interp, n_gridpoints_effective

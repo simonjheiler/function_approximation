@@ -10,23 +10,31 @@ from src.interpolate import interpolate_spline
 interp_params = {}
 interp_params["linear"] = {}
 interp_params["linear"]["seed"] = 123
-interp_params["linear"]["grid_method"] = "regular"
+interp_params["linear"]["grid_method"] = "sparse"
+interp_params["linear"]["sparse_grid_levels"] = 2
 interp_params["linear"]["interpolation_points"] = 3
 interp_params["linear"]["n_interpolation_points"] = 3
 interp_params["smolyak"] = {}
-interp_params["smolyak"]["mu"] = 1
+interp_params["smolyak"]["grid_method"] = "sparse"
+interp_params["smolyak"]["sparse_grid_levels"] = 2
 interp_params["spline"] = {}
 interp_params["spline"]["interpolation_points"] = 3
+interp_params["spline"]["grid_method"] = "sparse"
+interp_params["spline"]["sparse_grid_levels"] = 2
+
 
 # set study parameters
 study_params = {}
 
 study_params["controls"] = {
     "load data": False,
-    "method": "spline",
-    "grid size": "large",
+    "interpolation method": "linear",
+    "grid_method": "sparse",
+    "grid size": "medium",
     "variables": [2],
     "function to approximate": zhou,
+    "number of points for accuracy check": 1000,
+    "seed for accuracy check": 123,
 }
 
 

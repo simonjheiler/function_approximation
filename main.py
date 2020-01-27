@@ -1,22 +1,26 @@
 import os
 import pdb  # noqa:F401
-import pickle
+import pickle  # noqa:F401
 import sys
+
 
 root = os.path.dirname(os.path.abspath(sys.argv[0]))
 sys.path.insert(0, root)
 
-import matplotlib.pyplot as plt
-import numpy as np
-from time import time
+import matplotlib.pyplot as plt  # noqa:F401
+import numpy as np  # noqa:F401
+from time import time  # noqa:F401
 
+from mpl_toolkits.mplot3d import Axes3D  # noqa:F401 # This import registers the
+
+# 3D projection, but is otherwise unused.
 from src.functions_to_approximate import borehole_numba as borehole  # noqa:F401
 from src.functions_to_approximate import zhou_vectorize as zhou  # noqa:F401
-from src.auxiliary import get_grid
-from src.auxiliary import get_interpolation_points
-from src.auxiliary import rmse as root_mean_squared_error
-from src.parameters import study_params
-from src.parameters import interp_params
+from src.auxiliary import get_grid  # noqa:F401
+from src.auxiliary import get_interpolation_points  # noqa:F401
+from src.auxiliary import rmse as root_mean_squared_error  # noqa:F401
+from src.parameters import study_params  # noqa:F401
+from src.parameters import interp_params  # noqa:F401
 
 # from src.auxiliary import get_data
 # from src.auxiliary import rmse as root_mean_squared_error
@@ -27,9 +31,10 @@ from src.parameters import interp_params
 
 study_params["controls"] = {
     "load data": False,
-    "method": "smolyak",
+    "interpolation method": "spline",
+    "grid_method": "sparse",
     "grid size": "medium",
-    "variables": [2, 3, 4, 5, 6, 7, 8],
+    "variables": [2],
     "function to approximate": zhou,
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123,
@@ -40,14 +45,16 @@ study_params["controls"] = {
 # EXECUTION
 #########################################################################
 
+
 if not study_params["controls"]["load data"]:
 
     # load parameters
-    method = study_params["controls"]["method"]
+    interpolation_method = study_params["controls"]["interpolation method"]
     func = study_params["controls"]["function to approximate"]
     grid_size = study_params["controls"]["grid size"]
-    iterations = study_params[method]["iterations"]
-    interpolator = study_params[method]["interpolator"]
+    grid_method = study_params["controls"]["grid_method"]
+    iterations = study_params[interpolation_method]["iterations"]
+    interpolator = study_params[interpolation_method]["interpolator"]
     n_interpolation_points = study_params["controls"][
         "number of points for accuracy check"
     ]
@@ -55,7 +62,7 @@ if not study_params["controls"]["load data"]:
 
     # initiate dict to store results
     results = {}
-    results[method] = {"rmse": {}, "runtime": {}, "gridpoints": {}}
+    results[interpolation_method] = {"rmse": {}, "runtime": {}, "gridpoints": {}}
 
     for n_vars in study_params["controls"]["variables"]:
 
@@ -86,15 +93,16 @@ if not study_params["controls"]["load data"]:
             print(f"dimension: {n_vars}; iteration: {iteration + 1}")
 
             # adjust interpolation parameters
-            if study_params["controls"]["method"] == "linear":
+            interp_params[interpolation_method]["grid_method"] = grid_method
+            if study_params["controls"]["interpolation method"] == "linear":
                 interp_params["linear"]["interpolation_points"] = study_params[
                     "linear"
                 ]["interpolation_points"][iteration]
-            elif study_params["controls"]["method"] == "spline":
+            elif study_params["controls"]["interpolation method"] == "spline":
                 interp_params["spline"]["interpolation_points"] = study_params[
                     "spline"
                 ]["interpolation_points"][iteration]
-            elif study_params["controls"]["method"] == "smolyak":
+            elif study_params["controls"]["interpolation method"] == "smolyak":
                 interp_params["smolyak"]["mu"] = study_params["smolyak"]["mu"][
                     iteration
                 ]
@@ -110,17 +118,19 @@ if not study_params["controls"]["load data"]:
             rmse_iter = root_mean_squared_error(results_interp, results_calc)
 
             # print and store results
-            print("root mean squared error: " + method + f" {rmse_iter}")
-            print("computation time: " + method + " {}".format(stop - start))
+            print("root mean squared error: " + interpolation_method + f" {rmse_iter}")
+            print(
+                "computation time: " + interpolation_method + " {}".format(stop - start)
+            )
             print(f"gridpoints: {n_gridpoints_effective}")
 
             rmse_tmp.append(rmse_iter)
             runtime_tmp.append(stop - start)
             n_gridpoints_effective_tmp.append(n_gridpoints_effective)
 
-        results[method]["rmse"][n_vars] = np.array(object=rmse_tmp)
-        results[method]["runtime"][n_vars] = np.array(object=runtime_tmp)
-        results[method]["gridpoints"][n_vars] = np.array(
+        results[interpolation_method]["rmse"][n_vars] = np.array(object=rmse_tmp)
+        results[interpolation_method]["runtime"][n_vars] = np.array(object=runtime_tmp)
+        results[interpolation_method]["gridpoints"][n_vars] = np.array(
             object=n_gridpoints_effective_tmp
         )
 
@@ -134,7 +144,7 @@ if not study_params["controls"]["load data"]:
     file_to_store.close()
 
 elif study_params["controls"]["load data"]:
-    method = study_params["controls"]["method"]
+    interpolation_method = study_params["controls"]["method"]
     stored_results = open(
         "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
         "3_project/student-project-simonjheiler/results/sandbox/test_results.pkl",
@@ -146,21 +156,49 @@ elif study_params["controls"]["load data"]:
 # PLOTS
 #########################################################################
 
-plot_legend = []
-plot_x = []
-plot_y = []
-for n_vars in study_params["controls"]["variables"]:
-    plot_legend.append(n_vars)
-    plot_x.append(results[method]["gridpoints"][n_vars])
-    plot_y.append(results[method]["rmse"][n_vars])
+# plot_legend = []
+# plot_x = []
+# plot_y = []
+# for n_vars in study_params["controls"]["variables"]:
+#     plot_legend.append(n_vars)
+#     plot_x.append(results[interpolation_method]["gridpoints"][n_vars])
+#     plot_y.append(results[interpolation_method]["rmse"][n_vars])
+#
+# for idx in range(len(study_params["controls"]["variables"])):
+#     plt.plot(plot_x[idx], plot_y[idx])
+#
+# plt.xscale("log")
+# plt.yscale("log")
+# plt.xlabel("number of interpolation points (log axis)")
+# plt.ylabel("root mean squared error (log axis)")
+# plt.legend(plot_legend)
+# plt.title("Interpolation accuracy (" + grid_size + " grid)")
+# plt.show()
 
-for idx in range(len(study_params["controls"]["variables"])):
-    plt.plot(plot_x[idx], plot_y[idx])
 
-plt.xscale("log")
-plt.yscale("log")
-plt.xlabel("number of interpolation points (log axis)")
-plt.ylabel("root mean squared error (log axis)")
-plt.legend(plot_legend)
-plt.title("Interpolation accuracy (" + grid_size + " grid)")
-plt.show()
+# if coord.shape[1] == 2:
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111)
+#
+#     xs = coord[:, 0]
+#     ys = coord[:, 1]
+#     ax.scatter(xs, ys, marker="o")
+#
+#     ax.set_xlabel('X Label')
+#     ax.set_ylabel('Y Label')
+#
+#     plt.show()
+# elif coord.shape[1] == 3:
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
+#
+#     xs = coord[:, 0]
+#     ys = coord[:, 1]
+#     zs = coord[:, 2]
+#     ax.scatter(xs, ys, zs, marker="o")
+#
+#     ax.set_xlabel('X Label')
+#     ax.set_ylabel('Y Label')
+#     ax.set_zlabel('Z Label')
+#
+#     plt.show()
