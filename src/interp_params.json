@@ -5,11 +5,11 @@
     "interpolation points": 3
   },
   "smolyak": {
-    "grid method": "sparse",
+    "grid method": "regular",
     "sparse grid levels": 2
   },
   "spline": {
-    "grid method": "sparse",
+    "grid method": "regular",
     "sparse grid levels": 5,
     "interpolation points": 3
   }

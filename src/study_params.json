@@ -115,7 +115,7 @@
   },
   "linear": {
     "interpolator": "interpolate_linear",
-    "interpolation_points": [
+    "interpolation points": [
       2,
       3,
       5,
@@ -125,7 +125,7 @@
       13,
       15
     ],
-    "sparse_grid_levels": [
+    "sparse grid levels": [
       1,
       2,
       3,
@@ -135,7 +135,7 @@
       7,
       8
     ],
-    "iterations": 5
+    "iterations": 8
   },
   "smolyak": {
     "interpolator": "interpolate_smolyak",
@@ -148,7 +148,7 @@
   },
   "spline": {
     "interpolator": "interpolate_spline",
-    "interpolation_points": [
+    "interpolation points": [
       2,
       3,
       5,

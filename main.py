@@ -89,7 +89,6 @@ if study_params["controls"]["load data"] == "False":
 
             # adjust interpolation parameters
             interp_params[interpolation_method]["grid method"] = grid_method
-            pdb.set_trace()
             if interpolation_method == "linear":
                 interp_params["linear"]["sparse grid levels"] = study_params["linear"][
                     "sparse grid levels"
@@ -149,12 +148,12 @@ elif study_params["controls"]["load data"] == "True":
 plot_legend = []
 plot_x = []
 plot_y = []
-for dims in study_params["controls"]["variables"]:
+for dims in study_params["controls"]["dims"]:
     plot_legend.append(dims)
     plot_x.append(results[interpolation_method]["gridpoints"][dims])
     plot_y.append(results[interpolation_method]["rmse"][dims])
 
-for idx in range(len(study_params["controls"]["variables"])):
+for idx in range(len(study_params["controls"]["dims"])):
     plt.plot(plot_x[idx], plot_y[idx])
 
 plt.xscale("log")

@@ -1,5 +1,5 @@
-import json
 import os
+import pdb  # noqa F401
 import sys
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,10 +23,6 @@ from src.auxiliary import states_to_ids_batch
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal
 from numpy.testing import assert_almost_equal
-
-# load default interpolation parameters
-with open("./src/study_params.json") as json_file:
-    study_params = json.load(json_file)
 
 
 #########################################################################
@@ -81,7 +77,10 @@ def setup_state_to_id():
 @pytest.fixture
 def setup_get_grid():
     out = {}
-    out["study_params"] = study_params
+    out["grid_params"] = {}
+    out["grid_params"]["orders"] = [3, 2, 5]
+    out["grid_params"]["lower bounds"] = [1.0, 1.0, 1.0]
+    out["grid_params"]["upper bounds"] = [2.0, 2.0, 5.0]
     out["dims"] = 3
     return out
 
@@ -197,13 +196,15 @@ def test_get_corner_points():
 
 
 def test_get_grid(setup_get_grid):
-    expected = {
+    grid_expected = {
         0: np.array([1.0, 1.5, 2.0]),
         1: np.array([1.0, 2.0]),
         2: np.array([1.0, 2.0, 3.0, 4.0, 5.0]),
     }
-    actual = get_grid(**setup_get_grid)
-    assert_equal(actual, expected)
+    index_expected = np.array(object=list(range(2 * 3 * 5)))
+    grid_actual, index_actual = get_grid(**setup_get_grid)
+    assert_equal(grid_actual, grid_expected)
+    assert_equal(index_actual, index_expected)
 
 
 def test_mse(setup_approximation_error):
