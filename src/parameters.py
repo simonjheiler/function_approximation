@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 
 from src.functions_to_approximate import borehole_numba as borehole  # noqa:F401
@@ -7,20 +9,8 @@ from src.interpolate import interpolate_smolyak
 from src.interpolate import interpolate_spline
 
 # set defaults for interpolation parameters
-interp_params = {}
-interp_params["linear"] = {}
-interp_params["linear"]["seed"] = 123
-interp_params["linear"]["grid_method"] = "sparse"
-interp_params["linear"]["sparse_grid_levels"] = 2
-interp_params["linear"]["interpolation_points"] = 3
-interp_params["linear"]["n_interpolation_points"] = 3
-interp_params["smolyak"] = {}
-interp_params["smolyak"]["grid_method"] = "sparse"
-interp_params["smolyak"]["sparse_grid_levels"] = 2
-interp_params["spline"] = {}
-interp_params["spline"]["interpolation_points"] = 3
-interp_params["spline"]["grid_method"] = "sparse"
-interp_params["spline"]["sparse_grid_levels"] = 2
+with open("./src/parameters.json") as json_file:
+    interp_params = json.load(json_file)
 
 
 # set study parameters
@@ -70,7 +60,8 @@ study_params["linear"] = {
     "interpolator": interpolate_linear,
     "share_not_interpolated": [0.0, 0.2, 0.4],
     "interpolation_points": [2, 3, 5, 7, 9, 11],
-    "iterations": 3,
+    "sparse_grid_levels": [1, 2, 3, 4, 5, 6],
+    "iterations": 6,
 }
 study_params["smolyak"] = {
     "interpolator": interpolate_smolyak,

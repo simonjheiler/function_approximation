@@ -31,10 +31,10 @@ from src.parameters import interp_params  # noqa:F401
 
 study_params["controls"] = {
     "load data": False,
-    "interpolation method": "spline",
+    "interpolation method": "linear",
     "grid_method": "sparse",
     "grid size": "medium",
-    "variables": [2],
+    "variables": [2, 3, 4, 5, 6],
     "function to approximate": zhou,
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123,
@@ -98,6 +98,9 @@ if not study_params["controls"]["load data"]:
                 interp_params["linear"]["interpolation_points"] = study_params[
                     "linear"
                 ]["interpolation_points"][iteration]
+                interp_params["linear"]["sparse_grid_levels"] = study_params["linear"][
+                    "sparse_grid_levels"
+                ][iteration]
             elif study_params["controls"]["interpolation method"] == "spline":
                 interp_params["spline"]["interpolation_points"] = study_params[
                     "spline"

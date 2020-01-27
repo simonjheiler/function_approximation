@@ -37,22 +37,23 @@ def get_dims_state_grid(n_dims, n_gridpoints):
     return dims_state_grid
 
 
-def get_corner_states(dims_state_grid):
+def get_corner_points(grid):
+
+    grid_min = np.array(object=[min(v) for _, v in grid.items()])
+    grid_max = np.array(object=[max(v) for _, v in grid.items()])
 
     grids_bounds = []
-    for idx in range(dims_state_grid.size):
-        tmp = [0, dims_state_grid[idx] - 1]
+    for idx in range(len(grid_min)):
+        tmp = [grid_min[idx], grid_max[idx]]
         grids_bounds.append(tmp)
 
-    corner_states = pd.DataFrame(
-        index=pd.MultiIndex.from_product(
-            grids_bounds, names=range(dims_state_grid.size),
-        )
+    corner_points = pd.DataFrame(
+        index=pd.MultiIndex.from_product(grids_bounds, names=range(grid_min.size),)
     ).reset_index()
 
-    corner_states = np.array(object=corner_states)
+    corner_points = np.array(object=corner_points)
 
-    return corner_states
+    return corner_points
 
 
 def state_to_id(state, dims_state_grid):

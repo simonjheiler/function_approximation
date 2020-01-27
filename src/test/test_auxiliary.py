@@ -7,7 +7,7 @@ sys.path.insert(0, root)
 import numpy as np
 import pytest
 
-from src.auxiliary import get_corner_states
+from src.auxiliary import get_corner_points
 from src.auxiliary import get_grid
 from src.auxiliary import inputs_from_ids_batch
 from src.auxiliary import inputs_from_state
@@ -174,9 +174,13 @@ def test_states_to_ids_batch(setup_state_to_id):
     assert actual == expected
 
 
-def test_get_corner_states():
-    setup_get_corner_states = {}
-    setup_get_corner_states["dims_state_grid"] = np.array(object=[3, 2, 5])
+def test_get_corner_points():
+    setup_get_corner_points = {}
+    setup_get_corner_points["grid"] = {
+        0: np.array(object=[0.0, 2.0]),
+        1: np.array(object=[0.0, 1.0]),
+        2: np.array(object=[0.0, 4.0]),
+    }
     expected = np.array(
         object=[
             [0, 0, 0],
@@ -189,7 +193,7 @@ def test_get_corner_states():
             [2, 1, 4],
         ]
     )
-    actual = get_corner_states(**setup_get_corner_states)
+    actual = get_corner_points(**setup_get_corner_points)
     assert_array_equal(actual, expected)
 
 

@@ -7,12 +7,12 @@ from interpolation.smolyak.grid import SmolyakGrid as sg
 from interpolation.smolyak.interp import SmolyakInterp as si
 from interpolation.splines import CubicSpline as spline
 
+from src.auxiliary import get_corner_points
 from src.pysg import sparseGrid
 
 # from src.pysg import generatePoints
 
 # from interpolation.multilinear.mlinterp import mlinterp
-# from src.auxiliary import get_corner_states
 # from src.auxiliary import get_dims_state_grid
 # from src.auxiliary import get_grid
 # from src.auxiliary import inputs_from_ids_batch
@@ -123,6 +123,12 @@ def interpolate_linear(points, grid, func, interp_params):
         grid_interp, n_gridpoints_effective = get_interpolation_grid_sparse(
             n_dims, grid_min, grid_max, interp_params
         )
+
+    # make sure corner states are included in interpolation grid
+    corner_points = get_corner_points(grid)
+    grid_interp = np.append(grid_interp, corner_points).reshape(
+        corner_points.shape[0] + grid_interp.shape[0], grid_interp.shape[1]
+    )
 
     # evaluate function on grid
     f_on_grid = func(grid_interp)
