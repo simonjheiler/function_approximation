@@ -41,36 +41,34 @@ if study_params["controls"]["load data"] == "False":
 
     # load parameters
     interpolation_method = study_params["controls"]["interpolation method"]
-    func = getattr(functions, study_params["controls"]["function to approximate"])
+    func_name = study_params["controls"]["function to approximate"]
+    interpolator_name = study_params[interpolation_method]["interpolator"]
     grid_size = study_params["controls"]["grid size"]
-    grid_method = study_params["controls"]["grid_method"]
+    grid_method = study_params["controls"]["grid method"]
     iterations = study_params[interpolation_method]["iterations"]
-    interpolator = getattr(
-        interpolators, study_params[interpolation_method]["interpolator"]
-    )
     n_interpolation_points = study_params["controls"][
         "number of points for accuracy check"
     ]
     accuracy_check_seed = study_params["controls"]["seed for accuracy check"]
 
+    # set grid parameters
+    grid_params = {}
+    grid_params["orders"] = study_params["grid"]["orders"][grid_size]
+    grid_params["lower bounds"] = study_params["grid"]["lower bounds"][func_name]
+    grid_params["upper bounds"] = study_params["grid"]["upper bounds"][func_name]
+
+    # set functionals for function to approximate and interpolator
+    func = getattr(functions, func_name)
+    interpolator = getattr(interpolators, interpolator_name)
+
     # initiate dict to store results
     results = {}
     results[interpolation_method] = {"rmse": {}, "runtime": {}, "gridpoints": {}}
 
-    for n_vars in study_params["controls"]["variables"]:
+    for dims in study_params["controls"]["dims"]:
 
         # generate grid
-        n_gridpoints = study_params["grid"]["zhou"]["n_gridpoints"][grid_size]
-        grid_min = np.array(
-            object=study_params["grid"]["zhou"]["lower bounds"][:n_vars]
-        )
-        grid_max = np.array(
-            object=study_params["grid"]["zhou"]["upper bounds"][:n_vars]
-        )
-        dims_state_grid = np.array(object=[n_gridpoints] * n_vars, dtype=int,)
-        n_states = dims_state_grid.prod()
-        grid = get_grid(dims_state_grid, grid_min, grid_max)
-        index = np.array(object=range(n_states))
+        grid, index = get_grid(grid_params, dims)
 
         # get interpolation points
         interpolation_points = get_interpolation_points(
@@ -87,22 +85,20 @@ if study_params["controls"]["load data"] == "False":
 
         # iterate over settings
         for iteration in range(iterations):
-            print(f"dimension: {n_vars}; iteration: {iteration + 1}")
+            print(f"dimension: {dims}; iteration: {iteration + 1}")
 
             # adjust interpolation parameters
-            interp_params[interpolation_method]["grid_method"] = grid_method
-            if study_params["controls"]["interpolation method"] == "linear":
-                interp_params["linear"]["interpolation_points"] = study_params[
-                    "linear"
-                ]["interpolation_points"][iteration]
-                interp_params["linear"]["sparse_grid_levels"] = study_params["linear"][
-                    "sparse_grid_levels"
+            interp_params[interpolation_method]["grid method"] = grid_method
+            pdb.set_trace()
+            if interpolation_method == "linear":
+                interp_params["linear"]["sparse grid levels"] = study_params["linear"][
+                    "sparse grid levels"
                 ][iteration]
-            elif study_params["controls"]["interpolation method"] == "spline":
-                interp_params["spline"]["interpolation_points"] = study_params[
+            elif interpolation_method == "spline":
+                interp_params["spline"]["interpolation points"] = study_params[
                     "spline"
-                ]["interpolation_points"][iteration]
-            elif study_params["controls"]["interpolation method"] == "smolyak":
+                ]["interpolation points"][iteration]
+            elif interpolation_method == "smolyak":
                 interp_params["smolyak"]["mu"] = study_params["smolyak"]["mu"][
                     iteration
                 ]
@@ -117,20 +113,14 @@ if study_params["controls"]["load data"] == "False":
             # assess interpolation accuracy
             rmse_iter = root_mean_squared_error(results_interp, results_calc)
 
-            # print and store results
-            print("root mean squared error: " + interpolation_method + f" {rmse_iter}")
-            print(
-                "computation time: " + interpolation_method + " {}".format(stop - start)
-            )
-            print(f"gridpoints: {n_gridpoints_effective}")
-
+            # store results
             rmse_tmp.append(rmse_iter)
             runtime_tmp.append(stop - start)
             n_gridpoints_effective_tmp.append(n_gridpoints_effective)
 
-        results[interpolation_method]["rmse"][n_vars] = np.array(object=rmse_tmp)
-        results[interpolation_method]["runtime"][n_vars] = np.array(object=runtime_tmp)
-        results[interpolation_method]["gridpoints"][n_vars] = np.array(
+        results[interpolation_method]["rmse"][dims] = np.array(object=rmse_tmp)
+        results[interpolation_method]["runtime"][dims] = np.array(object=runtime_tmp)
+        results[interpolation_method]["gridpoints"][dims] = np.array(
             object=n_gridpoints_effective_tmp
         )
 
@@ -159,10 +149,10 @@ elif study_params["controls"]["load data"] == "True":
 plot_legend = []
 plot_x = []
 plot_y = []
-for n_vars in study_params["controls"]["variables"]:
-    plot_legend.append(n_vars)
-    plot_x.append(results[interpolation_method]["gridpoints"][n_vars])
-    plot_y.append(results[interpolation_method]["rmse"][n_vars])
+for dims in study_params["controls"]["variables"]:
+    plot_legend.append(dims)
+    plot_x.append(results[interpolation_method]["gridpoints"][dims])
+    plot_y.append(results[interpolation_method]["rmse"][dims])
 
 for idx in range(len(study_params["controls"]["variables"])):
     plt.plot(plot_x[idx], plot_y[idx])

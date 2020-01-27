@@ -11,25 +11,29 @@ import pandas as pd
 #########################################################################
 
 
-def get_grid(dims_state_grid, grid_min, grid_max):
+def get_grid(grid_params, dims):
 
-    n_dims = len(dims_state_grid)
+    orders = np.array(object=grid_params["orders"][:dims], dtype=int)
+    grid_min = np.array(object=grid_params["lower bounds"][:dims], dtype=float)
+    grid_max = np.array(object=grid_params["upper bounds"][:dims], dtype=float)
 
+    # calculate number of grid points and generate index
+    n_points = orders.prod()
+    index = np.array(object=range(n_points))
+
+    # generate grid
     grid = {}
-
-    for idx in range(n_dims):
-        grid_values_tmp = np.linspace(
-            grid_min[idx], grid_max[idx], dims_state_grid[idx],
-        )
+    for idx in range(dims):
+        grid_values_tmp = np.linspace(grid_min[idx], grid_max[idx], orders[idx],)
         grid[idx] = grid_values_tmp
 
-    return grid
+    return grid, index
 
 
-def get_dims_state_grid(n_dims, n_gridpoints):
+def get_dims_state_grid(dims, n_gridpoints):
 
-    tmp = np.zeros(n_dims, dtype=np.int)
-    for idx in range(n_dims):
+    tmp = np.zeros(dims, dtype=np.int)
+    for idx in range(dims):
         tmp[idx] = n_gridpoints[idx]
 
     dims_state_grid = np.array(object=list(tmp))

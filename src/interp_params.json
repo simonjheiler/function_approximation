@@ -1,18 +1,16 @@
 {
   "linear": {
-    "seed": 123,
-    "grid_method": "sparse",
-    "sparse_grid_levels": 5,
-    "interpolation_points": 3,
-    "n_interpolation_points": 3
+    "grid method": "sparse",
+    "sparse grid levels": 5,
+    "interpolation points": 3
   },
   "smolyak": {
-    "grid_method": "sparse",
-    "sparse_grid_levels": 2
+    "grid method": "sparse",
+    "sparse grid levels": 2
   },
   "spline": {
-    "interpolation_points": 3,
-    "grid_method": "sparse",
-    "sparse_grid_levels": 2
+    "grid method": "sparse",
+    "sparse grid levels": 5,
+    "interpolation points": 3
   }
 }

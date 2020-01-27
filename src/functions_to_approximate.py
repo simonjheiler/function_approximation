@@ -6,8 +6,6 @@ import pdb  # noqa:F401
 import numba as nb
 import numpy as np
 
-# import pandas as pd
-# import respy as rp
 
 #########################################################################
 # FUNCTIONS
@@ -56,7 +54,7 @@ def borehole_readable(input):
     return output
 
 
-def borehole_vectorize(input):
+def borehole(input):
     """Calculate the flow through a borehole given *inputs*.
 
     Args:
@@ -195,7 +193,7 @@ def zhou_phi_vectorize(input):
     return phi
 
 
-def zhou_vectorize(input):
+def zhou(input):
 
     d = input.shape[1]
 

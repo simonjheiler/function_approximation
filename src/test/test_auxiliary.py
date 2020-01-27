@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -23,10 +24,9 @@ from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal
 from numpy.testing import assert_almost_equal
 
-# from src.auxiliary import get_dims_state_grid
-# import pandas as pd
-# from pandas.testing import assert_frame_equal
-# from pandas.testing import assert_series_equal
+# load default interpolation parameters
+with open("./src/study_params.json") as json_file:
+    study_params = json.load(json_file)
 
 
 #########################################################################
@@ -81,9 +81,8 @@ def setup_state_to_id():
 @pytest.fixture
 def setup_get_grid():
     out = {}
-    out["dims_state_grid"] = np.array(object=[3, 2, 5])
-    out["grid_min"] = np.array([1.0, 1.0, 1.0])
-    out["grid_max"] = np.array([2.0, 2.0, 5.0])
+    out["study_params"] = study_params
+    out["dims"] = 3
     return out
 
 

@@ -10,11 +10,11 @@ import pytest
 
 from src.functions_to_approximate import borehole_numba
 from src.functions_to_approximate import borehole_readable
-from src.functions_to_approximate import borehole_vectorize
+from src.functions_to_approximate import borehole as borehole_vectorize
 from src.functions_to_approximate import zhou_phi
 from src.functions_to_approximate import zhou_phi_vectorize
 from src.functions_to_approximate import zhou_readable
-from src.functions_to_approximate import zhou_vectorize
+from src.functions_to_approximate import zhou as zhou_vectorize
 
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal

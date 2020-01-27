@@ -2,20 +2,20 @@
   "controls": {
     "load data": "False",
     "interpolation method": "linear",
-    "grid_method": "sparse",
+    "grid method": "sparse",
     "grid size": "medium",
-    "variables": [
+    "dims": [
       2,
       3,
       4
     ],
-    "function to approximate": "zhou_vectorize",
+    "function to approximate": "zhou",
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123
   },
   "grid": {
-    "borehole": {
-      "lower bounds": [
+    "lower bounds": {
+      "borehole": [
         63070.0,
         990.0,
         700.0,
@@ -25,7 +25,19 @@
         1500.0,
         63.1
       ],
-      "upper bounds": [
+      "zhou": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "upper bounds": {
+      "borehole": [
         115600.0,
         1110.0,
         820.0,
@@ -35,7 +47,19 @@
         15000.0,
         116.0
       ],
-      "input default": [
+      "zhou": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "input default": {
+      "borehole": [
         89335.0,
         1050.0,
         760.0,
@@ -45,34 +69,7 @@
         8250.0,
         89.55
       ],
-      "n_gridpoints": {
-        "small": 5,
-        "medium": 10,
-        "large": 100
-      }
-    },
-    "zhou": {
-      "lower bounds": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      ],
-      "upper bounds": [
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0
-      ],
-      "input default": [
+      "zhou": [
         0.5,
         0.5,
         0.5,
@@ -81,21 +78,43 @@
         0.5,
         0.5,
         0.5
+      ]
+    },
+    "orders": {
+      "small": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
       ],
-      "n_gridpoints": {
-        "small": 5,
-        "medium": 10,
-        "large": 100
-      }
+      "medium": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "large": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ]
     }
   },
   "linear": {
     "interpolator": "interpolate_linear",
-    "share_not_interpolated": [
-      0.0,
-      0.2,
-      0.4
-    ],
     "interpolation_points": [
       2,
       3,
@@ -116,7 +135,7 @@
       7,
       8
     ],
-    "iterations": 8
+    "iterations": 5
   },
   "smolyak": {
     "interpolator": "interpolate_smolyak",
