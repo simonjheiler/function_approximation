@@ -15,11 +15,9 @@ from src.functions_to_approximate import zhou_phi
 from src.functions_to_approximate import zhou_phi_vectorize
 from src.functions_to_approximate import zhou_readable
 from src.functions_to_approximate import zhou_vectorize
-from src.parameters import study_params
+
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
-
-# from numpy.testing import assert_equal
 
 
 #########################################################################
@@ -56,8 +54,13 @@ def setup_borehole_truncated_input():
 @pytest.fixture
 def setup_borehole_large_set():
 
-    grid_min = study_params["grid"]["borehole"]["lower bounds"]
-    grid_max = study_params["grid"]["borehole"]["upper bounds"]
+    grid_min = np.array(
+        object=[63070.0, 990.0, 700.0, 100.0, 0.05, 1120.0, 1500.0, 63.1], dtype=float,
+    )
+    grid_max = np.array(
+        object=[115600.0, 1110.0, 820.0, 50000.0, 0.15, 1680.0, 15000.0, 116.0],
+        dtype=float,
+    )
 
     np.random.seed(121)
 
@@ -102,8 +105,8 @@ def setup_zhou_phi_on_domain():
 @pytest.fixture
 def setup_zhou_large_set():
 
-    grid_min = study_params["grid"]["zhou"]["lower bounds"]
-    grid_max = study_params["grid"]["zhou"]["upper bounds"]
+    grid_min = np.array(object=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=float,)
+    grid_max = np.array(object=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=float,)
 
     np.random.seed(123)
     input = []

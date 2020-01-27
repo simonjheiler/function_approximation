@@ -1,3 +1,4 @@
+import json
 import os
 import pdb  # noqa:F401
 import sys
@@ -11,16 +12,10 @@ import pytest
 from numpy.testing import assert_array_equal
 from src.interpolate import get_interpolation_grid_regular
 from src.interpolate import get_interpolation_grid_sparse
-from src.parameters import interp_params  # noqa:F401
 
-# from src.interpolate import interpolate_linear
-# from src.interpolate import interpolate_smolyak
-# from numpy.testing import assert_equal
-
-# import pandas as pd
-# from pandas.testing import assert_frame_equal
-# from pandas.testing import assert_series_equal
-
+# load default interpolation parameters
+with open("./src/interp_params.json") as json_file:
+    interp_params = json.load(json_file)
 
 #########################################################################
 # FIXTURES

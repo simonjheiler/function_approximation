@@ -1,44 +1,35 @@
+import json
 import os
 import pdb  # noqa:F401
-import pickle  # noqa:F401
+import pickle
 import sys
-
 
 root = os.path.dirname(os.path.abspath(sys.argv[0]))
 sys.path.insert(0, root)
 
-import matplotlib.pyplot as plt  # noqa:F401
-import numpy as np  # noqa:F401
-from time import time  # noqa:F401
+import matplotlib.pyplot as plt
+import numpy as np
+import src.interpolate as interpolators
+import src.functions_to_approximate as functions
 
-from mpl_toolkits.mplot3d import Axes3D  # noqa:F401 # This import registers the
+from mpl_toolkits.mplot3d import Axes3D  # noqa:F401
+from src.auxiliary import get_grid
+from src.auxiliary import get_interpolation_points
+from src.auxiliary import rmse as root_mean_squared_error
+from time import time
 
-# 3D projection, but is otherwise unused.
-from src.functions_to_approximate import borehole_numba as borehole  # noqa:F401
-from src.functions_to_approximate import zhou_vectorize as zhou  # noqa:F401
-from src.auxiliary import get_grid  # noqa:F401
-from src.auxiliary import get_interpolation_points  # noqa:F401
-from src.auxiliary import rmse as root_mean_squared_error  # noqa:F401
-from src.parameters import study_params  # noqa:F401
-from src.parameters import interp_params  # noqa:F401
-
-# from src.auxiliary import get_data
-# from src.auxiliary import rmse as root_mean_squared_error
 
 #########################################################################
 # PARAMETERS
 #########################################################################
 
-study_params["controls"] = {
-    "load data": False,
-    "interpolation method": "linear",
-    "grid_method": "sparse",
-    "grid size": "medium",
-    "variables": [2, 3, 4, 5, 6],
-    "function to approximate": zhou,
-    "number of points for accuracy check": 1000,
-    "seed for accuracy check": 123,
-}
+# load default interpolation parameters
+with open("./src/interp_params.json") as json_file:
+    interp_params = json.load(json_file)
+
+# load default study parameters
+with open("./src/study_params.json") as json_file:
+    study_params = json.load(json_file)
 
 
 #########################################################################
@@ -46,15 +37,17 @@ study_params["controls"] = {
 #########################################################################
 
 
-if not study_params["controls"]["load data"]:
+if study_params["controls"]["load data"] == "False":
 
     # load parameters
     interpolation_method = study_params["controls"]["interpolation method"]
-    func = study_params["controls"]["function to approximate"]
+    func = getattr(functions, study_params["controls"]["function to approximate"])
     grid_size = study_params["controls"]["grid size"]
     grid_method = study_params["controls"]["grid_method"]
     iterations = study_params[interpolation_method]["iterations"]
-    interpolator = study_params[interpolation_method]["interpolator"]
+    interpolator = getattr(
+        interpolators, study_params[interpolation_method]["interpolator"]
+    )
     n_interpolation_points = study_params["controls"][
         "number of points for accuracy check"
     ]
@@ -68,8 +61,12 @@ if not study_params["controls"]["load data"]:
 
         # generate grid
         n_gridpoints = study_params["grid"]["zhou"]["n_gridpoints"][grid_size]
-        grid_min = study_params["grid"]["zhou"]["lower bounds"][:n_vars]
-        grid_max = study_params["grid"]["zhou"]["upper bounds"][:n_vars]
+        grid_min = np.array(
+            object=study_params["grid"]["zhou"]["lower bounds"][:n_vars]
+        )
+        grid_max = np.array(
+            object=study_params["grid"]["zhou"]["upper bounds"][:n_vars]
+        )
         dims_state_grid = np.array(object=[n_gridpoints] * n_vars, dtype=int,)
         n_states = dims_state_grid.prod()
         grid = get_grid(dims_state_grid, grid_min, grid_max)
@@ -146,7 +143,7 @@ if not study_params["controls"]["load data"]:
     pickle.dump(dict, file_to_store)
     file_to_store.close()
 
-elif study_params["controls"]["load data"]:
+elif study_params["controls"]["load data"] == "True":
     interpolation_method = study_params["controls"]["method"]
     stored_results = open(
         "C:/Users/simon/Documents/Uni/3_Bonn/3_WiSe19-20/topics_SBE/"
@@ -159,24 +156,24 @@ elif study_params["controls"]["load data"]:
 # PLOTS
 #########################################################################
 
-# plot_legend = []
-# plot_x = []
-# plot_y = []
-# for n_vars in study_params["controls"]["variables"]:
-#     plot_legend.append(n_vars)
-#     plot_x.append(results[interpolation_method]["gridpoints"][n_vars])
-#     plot_y.append(results[interpolation_method]["rmse"][n_vars])
-#
-# for idx in range(len(study_params["controls"]["variables"])):
-#     plt.plot(plot_x[idx], plot_y[idx])
-#
-# plt.xscale("log")
-# plt.yscale("log")
-# plt.xlabel("number of interpolation points (log axis)")
-# plt.ylabel("root mean squared error (log axis)")
-# plt.legend(plot_legend)
-# plt.title("Interpolation accuracy (" + grid_size + " grid)")
-# plt.show()
+plot_legend = []
+plot_x = []
+plot_y = []
+for n_vars in study_params["controls"]["variables"]:
+    plot_legend.append(n_vars)
+    plot_x.append(results[interpolation_method]["gridpoints"][n_vars])
+    plot_y.append(results[interpolation_method]["rmse"][n_vars])
+
+for idx in range(len(study_params["controls"]["variables"])):
+    plt.plot(plot_x[idx], plot_y[idx])
+
+plt.xscale("log")
+plt.yscale("log")
+plt.xlabel("number of interpolation points (log axis)")
+plt.ylabel("root mean squared error (log axis)")
+plt.legend(plot_legend)
+plt.title("Interpolation accuracy (" + grid_size + " grid)")
+plt.show()
 
 
 # if coord.shape[1] == 2:
