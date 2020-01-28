@@ -8,13 +8,16 @@ sys.path.insert(0, root)
 import numpy as np
 import pytest
 
-from src.functions_to_approximate import borehole_numba
+from src.functions_to_approximate import borehole_wrapper_numba_iter
+from src.functions_to_approximate import borehole_wrapper_numba_vectorize
 from src.functions_to_approximate import borehole_readable
-from src.functions_to_approximate import borehole as borehole_vectorize
+
+# from src.functions_to_approximate import borehole_step_numba_iter
+# from src.functions_to_approximate import borehole_step_numba_vectorize
 from src.functions_to_approximate import zhou_phi
 from src.functions_to_approximate import zhou_phi_vectorize
 from src.functions_to_approximate import zhou_readable
-from src.functions_to_approximate import zhou as zhou_vectorize
+from src.functions_to_approximate import zhou_vectorize
 
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
@@ -142,7 +145,7 @@ def test_borehole_readable_on_domain(setup_borehole_on_domain):
     assert_array_equal(actual, expected)
 
 
-def test_borehole_numba_on_domain(setup_borehole_on_domain):
+def test_borehole_numba_iter_on_domain(setup_borehole_on_domain):
     expected = np.array(
         object=[
             np.pi * 40000000 / (1001 * np.log(10000) + 3000000),
@@ -150,7 +153,19 @@ def test_borehole_numba_on_domain(setup_borehole_on_domain):
         ],
         dtype=float,
     )
-    actual = borehole_numba(**setup_borehole_on_domain)
+    actual = borehole_wrapper_numba_iter(**setup_borehole_on_domain)
+    assert_array_equal(actual, expected)
+
+
+def test_borehole_numba_vectorize_on_domain(setup_borehole_on_domain):
+    expected = np.array(
+        object=[
+            np.pi * 40000000 / (1001 * np.log(10000) + 3000000),
+            np.pi * 40000000 / (1001 * np.log(10000) + 3000000),
+        ],
+        dtype=float,
+    )
+    actual = borehole_wrapper_numba_vectorize(**setup_borehole_on_domain)
     assert_array_equal(actual, expected)
 
 
@@ -170,7 +185,7 @@ def test_borehole_readable_truncated_input(setup_borehole_truncated_input):
     assert_array_almost_equal(actual, expected)
 
 
-def test_borehole_vectorize_truncated_input(setup_borehole_truncated_input):
+def test_borehole_numba_iter_truncated_input(setup_borehole_truncated_input):
     expected = np.array(
         object=[
             np.pi
@@ -182,11 +197,11 @@ def test_borehole_vectorize_truncated_input(setup_borehole_truncated_input):
         ],
         dtype=float,
     )
-    actual = borehole_vectorize(**setup_borehole_truncated_input)
+    actual = borehole_wrapper_numba_iter(**setup_borehole_truncated_input)
     assert_array_almost_equal(actual, expected)
 
 
-def test_borehole_numba_truncated_input(setup_borehole_truncated_input):
+def test_borehole_numba_vectorize_truncated_input(setup_borehole_truncated_input):
     expected = np.array(
         object=[
             np.pi
@@ -198,19 +213,19 @@ def test_borehole_numba_truncated_input(setup_borehole_truncated_input):
         ],
         dtype=float,
     )
-    actual = borehole_numba(**setup_borehole_truncated_input)
+    actual = borehole_wrapper_numba_vectorize(**setup_borehole_truncated_input)
     assert_array_almost_equal(actual, expected, decimal=12)
 
 
-def test_borehole_readable_equals_numba(setup_borehole_large_set):
+def test_borehole_readable_equals_numba_iter(setup_borehole_large_set):
     actual_readable = borehole_readable(**setup_borehole_large_set)
-    actual_numba = borehole_numba(**setup_borehole_large_set)
+    actual_numba = borehole_wrapper_numba_iter(**setup_borehole_large_set)
     assert_array_almost_equal(actual_readable, actual_numba, decimal=12)
 
 
-def test_borehole_numba_equals_vectorize(setup_borehole_large_set):
-    actual_numba = borehole_numba(**setup_borehole_large_set)
-    actual_vectorize = borehole_vectorize(**setup_borehole_large_set)
+def test_borehole_numba_iter_equals_numba_vectorize(setup_borehole_large_set):
+    actual_numba = borehole_wrapper_numba_iter(**setup_borehole_large_set)
+    actual_vectorize = borehole_wrapper_numba_vectorize(**setup_borehole_large_set)
     assert_array_almost_equal(actual_numba, actual_vectorize, decimal=12)
 
 

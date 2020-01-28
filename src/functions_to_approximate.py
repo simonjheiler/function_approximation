@@ -24,6 +24,7 @@ def borehole_readable(input):
     Returns:
         output (np.array)
 
+
     """
     input_default = [89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
 
@@ -49,12 +50,13 @@ def borehole_readable(input):
         )
         output.append(output_tmp)
 
-    output = np.array(object=output, dtype=float)
+    output = np.array(object=output)
 
     return output
 
 
-def borehole(input):
+# @nb.njit
+def borehole_wrapper_numba_vectorize(input):
     """Calculate the flow through a borehole given *inputs*.
 
     Args:
@@ -64,17 +66,31 @@ def borehole(input):
         output (float)
 
     """
-    input_default = [89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
+    input_default = np.array(
+        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
+    )
 
-    input = np.append(input, [input_default[input.shape[1] :]] * input.shape[0], axis=1)
+    points = np.full((input.shape[0], len(input_default)), np.nan)
+    if input.shape[1] == len(input_default):
+        points = input
+    else:
+        input_fill = np.full(
+            (input.shape[0], len(input_default[input.shape[1] :])), np.nan
+        )
+        for col in range(len(input_default[input.shape[1] :])):
+            input_fill[:, col] = np.repeat(
+                input_default[input.shape[1] + col], input.shape[0]
+            )
+        points[:, : input.shape[1]] = input
+        points[:, input.shape[1] :] = input_fill
 
-    output = borehole_vectorize_jit(input)
+    output = borehole_step_numba_vectorize(points)
 
     return output
 
 
-@nb.jit(nopython=True)
-def borehole_vectorize_jit(input):
+@nb.njit
+def borehole_step_numba_vectorize(input):
     """Calculate the flow through a borehole given *inputs*.
 
     Args:
@@ -102,7 +118,8 @@ def borehole_vectorize_jit(input):
     return output
 
 
-def borehole_numba(input):
+# @nb.njit
+def borehole_wrapper_numba_iter(input):
     """Calculate the flow through a borehole given *inputs*.
 
     Args:
@@ -112,22 +129,34 @@ def borehole_numba(input):
         output (float)
 
     """
-    input_default = [89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
+    input_default = np.array(
+        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55],
+    )
 
-    input = np.append(input, [input_default[input.shape[1] :]] * input.shape[0], axis=1)
+    points = np.full((input.shape[0], len(input_default)), np.nan)
+    if input.shape[1] == len(input_default):
+        points = input
+    else:
+        input_fill = np.full(
+            (input.shape[0], len(input_default[input.shape[1] :])), np.nan
+        )
+        for col in range(len(input_default[input.shape[1] :])):
+            input_fill[:, col] = np.repeat(
+                input_default[input.shape[1] + col], input.shape[0]
+            )
+        points[:, : input.shape[1]] = input
+        points[:, input.shape[1] :] = input_fill
 
-    output = []
-    for idx in range(input.shape[0]):
-        input_tmp = input[idx, :]
-        output_tmp = borehole_jit(input_tmp)
-        output.append(output_tmp)
-    output = np.array(object=output, dtype=float)
+    output = np.full(input.shape[0], np.nan)
+    for idx in range(points.shape[0]):
+        point = points[idx, :]
+        output[idx] = borehole_step_numba_iter(point)
 
     return output
 
 
-@nb.jit(nopython=True)
-def borehole_jit(input):
+@nb.njit
+def borehole_step_numba_iter(input):
     """Calculate the flow through a borehole given *inputs*.
 
     Args:
@@ -158,6 +187,7 @@ def borehole_jit(input):
 # ZHOU (1998) FUNCTION
 
 
+@nb.njit
 def zhou_phi(input):
 
     d = len(input)
@@ -185,6 +215,7 @@ def zhou_readable(input):
     return output
 
 
+# @nb.njit
 def zhou_phi_vectorize(input):
 
     d = input.shape[1]
@@ -193,7 +224,16 @@ def zhou_phi_vectorize(input):
     return phi
 
 
-def zhou(input):
+# @nb.njit
+def zhou_phi_vectorize_jit(input):
+
+    d = input.shape[1]
+    phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input, axis=1) ** 2)
+
+    return phi
+
+
+def zhou_vectorize(input):
 
     d = input.shape[1]
 
@@ -207,6 +247,25 @@ def zhou(input):
     )
 
     # pdb.set_trace()
-    output = np.array(object=output, dtype=float)
+    output = np.array(object=output)
+
+    return output
+
+
+# @nb.njit
+def zhou_numba(input):
+
+    d = input.shape[1]
+
+    output = (
+        10 ** d
+        / 2
+        * (
+            zhou_phi_vectorize(10 * (input - [1 / 3] * d))
+            + zhou_phi_vectorize(10 * (input - [2 / 3] * d))
+        )
+    )
+
+    output = np.array(object=output)
 
     return output
