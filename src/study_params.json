@@ -6,10 +6,9 @@
     "grid size": "medium",
     "dims": [
       2,
-      3,
-      4
+      3
     ],
-    "function to approximate": "zhou",
+    "function to approximate": "zhou_vectorize",
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123
   },
@@ -135,7 +134,7 @@
       7,
       8
     ],
-    "iterations": 8
+    "iterations": 5
   },
   "smolyak": {
     "interpolator": "interpolate_smolyak",

@@ -8,19 +8,20 @@ sys.path.insert(0, root)
 import numpy as np
 import pytest
 
-from src.functions_to_approximate import borehole_wrapper_numba_iter
-from src.functions_to_approximate import borehole_wrapper_numba_vectorize
+from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_almost_equal
+from src.functions_to_approximate import borehole_wrapper_iter
+from src.functions_to_approximate import borehole_wrapper_vectorize
 from src.functions_to_approximate import borehole_readable
+from src.functions_to_approximate import zhou_phi_readable
+from src.functions_to_approximate import zhou_phi_vectorize
+from src.functions_to_approximate import zhou_phi_numba
+from src.functions_to_approximate import zhou_readable
+from src.functions_to_approximate import zhou_vectorize
+from src.functions_to_approximate import zhou_numba
 
 # from src.functions_to_approximate import borehole_step_numba_iter
 # from src.functions_to_approximate import borehole_step_numba_vectorize
-from src.functions_to_approximate import zhou_phi
-from src.functions_to_approximate import zhou_phi_vectorize
-from src.functions_to_approximate import zhou_readable
-from src.functions_to_approximate import zhou_vectorize
-
-from numpy.testing import assert_array_equal
-from numpy.testing import assert_array_almost_equal
 
 
 #########################################################################
@@ -153,7 +154,7 @@ def test_borehole_numba_iter_on_domain(setup_borehole_on_domain):
         ],
         dtype=float,
     )
-    actual = borehole_wrapper_numba_iter(**setup_borehole_on_domain)
+    actual = borehole_wrapper_iter(**setup_borehole_on_domain)
     assert_array_equal(actual, expected)
 
 
@@ -165,7 +166,7 @@ def test_borehole_numba_vectorize_on_domain(setup_borehole_on_domain):
         ],
         dtype=float,
     )
-    actual = borehole_wrapper_numba_vectorize(**setup_borehole_on_domain)
+    actual = borehole_wrapper_vectorize(**setup_borehole_on_domain)
     assert_array_equal(actual, expected)
 
 
@@ -197,7 +198,7 @@ def test_borehole_numba_iter_truncated_input(setup_borehole_truncated_input):
         ],
         dtype=float,
     )
-    actual = borehole_wrapper_numba_iter(**setup_borehole_truncated_input)
+    actual = borehole_wrapper_iter(**setup_borehole_truncated_input)
     assert_array_almost_equal(actual, expected)
 
 
@@ -213,28 +214,46 @@ def test_borehole_numba_vectorize_truncated_input(setup_borehole_truncated_input
         ],
         dtype=float,
     )
-    actual = borehole_wrapper_numba_vectorize(**setup_borehole_truncated_input)
+    actual = borehole_wrapper_vectorize(**setup_borehole_truncated_input)
     assert_array_almost_equal(actual, expected, decimal=12)
 
 
 def test_borehole_readable_equals_numba_iter(setup_borehole_large_set):
     actual_readable = borehole_readable(**setup_borehole_large_set)
-    actual_numba = borehole_wrapper_numba_iter(**setup_borehole_large_set)
+    actual_numba = borehole_wrapper_iter(**setup_borehole_large_set)
     assert_array_almost_equal(actual_readable, actual_numba, decimal=12)
 
 
 def test_borehole_numba_iter_equals_numba_vectorize(setup_borehole_large_set):
-    actual_numba = borehole_wrapper_numba_iter(**setup_borehole_large_set)
-    actual_vectorize = borehole_wrapper_numba_vectorize(**setup_borehole_large_set)
+    actual_numba = borehole_wrapper_iter(**setup_borehole_large_set)
+    actual_vectorize = borehole_wrapper_vectorize(**setup_borehole_large_set)
     assert_array_almost_equal(actual_numba, actual_vectorize, decimal=12)
 
 
 # ZHOU (1998) FUNCTION
 
 
-def test_zhou_phi_on_domain(setup_zhou_phi_on_domain):
+def test_zhou_phi_readable_on_domain(setup_zhou_phi_on_domain):
     expected = (2 * np.pi) ** (-4) * np.exp(-0.25)
-    actual = zhou_phi(**setup_zhou_phi_on_domain)
+    actual = zhou_phi_readable(**setup_zhou_phi_on_domain)
+    assert actual == expected
+
+
+def test_zhou_phi_vectorize_on_domain(setup_zhou_on_domain):
+    expected = np.array(
+        object=[
+            (2 * np.pi) ** (-4) * np.exp(-0.5 * 8 / 9),
+            (2 * np.pi) ** (-4) * np.exp(-0.5 * 32 / 9),
+        ],
+        dtype=float,
+    )
+    actual = zhou_phi_vectorize(**setup_zhou_on_domain)
+    assert_array_equal(actual, expected)
+
+
+def test_zhou_phi_numba_on_domain(setup_zhou_phi_on_domain):
+    expected = (2 * np.pi) ** (-4) * np.exp(-0.25)
+    actual = zhou_phi_numba(**setup_zhou_phi_on_domain)
     assert actual == expected
 
 
@@ -256,19 +275,7 @@ def test_zhou_readable_on_domain(setup_zhou_on_domain):
     assert_array_equal(actual, expected)
 
 
-def test_zhou_phi_vectorize(setup_zhou_on_domain):
-    expected = np.array(
-        object=[
-            (2 * np.pi) ** (-4) * np.exp(-0.5 * 8 / 9),
-            (2 * np.pi) ** (-4) * np.exp(-0.5 * 32 / 9),
-        ],
-        dtype=float,
-    )
-    actual = zhou_phi_vectorize(**setup_zhou_on_domain)
-    assert_array_equal(actual, expected)
-
-
-def test_zhou_vectorize(setup_zhou_on_domain):
+def test_zhou_vectorize_on_domain(setup_zhou_on_domain):
     expected = np.array(
         object=[
             0.5
@@ -286,7 +293,31 @@ def test_zhou_vectorize(setup_zhou_on_domain):
     assert_array_equal(actual, expected)
 
 
+def test_zhou_numba_on_domain(setup_zhou_on_domain):
+    expected = np.array(
+        object=[
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (1 + np.exp(-0.5 * 8 * (10 / 3) ** 2)),
+            0.5
+            * 10 ** 8
+            * (2 * np.pi) ** (-4)
+            * (np.exp(-0.5 * 8 * (10 / 3) ** 2) + 1),
+        ],
+        dtype=float,
+    )
+    actual = zhou_numba(**setup_zhou_on_domain)
+    assert_array_equal(actual, expected)
+
+
 def test_zhou_readable_equals_vectorize(setup_zhou_large_set):
     actual_readable = zhou_readable(**setup_zhou_large_set)
     actual_vectorize = zhou_vectorize(**setup_zhou_large_set)
     assert_array_almost_equal(actual_readable, actual_vectorize, decimal=12)
+
+
+def test_zhou_vectorize_equals_numba(setup_zhou_large_set):
+    actual_vectorize = zhou_vectorize(**setup_zhou_large_set)
+    actual_numba = zhou_numba(**setup_zhou_large_set)
+    assert_array_almost_equal(actual_vectorize, actual_numba, decimal=12)
