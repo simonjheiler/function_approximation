@@ -1,14 +1,17 @@
 {
   "controls": {
     "load data": "False",
-    "interpolation method": "linear",
-    "grid method": "sparse",
-    "grid size": "medium",
+    "interpolation method": "smolyak",
+    "grid method": "regular",
+    "grid size": "small",
     "dims": [
       2,
-      3
+      3,
+      4,
+      5,
+      6
     ],
-    "function to approximate": "zhou_vectorize",
+    "function to approximate": "borehole_wrapper_vectorize",
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123
   },

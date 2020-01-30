@@ -8,6 +8,7 @@ from interpolation.smolyak.interp import SmolyakInterp as si
 from interpolation.splines import CubicSpline as spline
 
 from src.auxiliary import get_corner_points
+from src.auxiliary import get_local_grid_step
 from src.pysg import sparseGrid
 
 #########################################################################
@@ -149,7 +150,8 @@ def interpolate_smolyak(points, grid, func, interp_params):
     grid_interp = s_grid.grid
 
     # evaluate function on grid
-    f_on_grid = func(grid_interp)
+    # f_on_grid = func(grid_interp)
+    f_on_grid = interpolate_locally_batch(grid_interp, grid, func)
 
     # generate interpolator
     interpolator = si(s_grid, f_on_grid)
@@ -186,3 +188,22 @@ def interpolate_spline(points, grid, func, interp_params):
     results_interp = interpolator(points)
 
     return results_interp, n_gridpoints_effective
+
+
+def interpolate_locally_step(point, local_grid, func):
+
+    f_on_grid = func(local_grid)
+    interpolator = sp_interpolate.LinearNDInterpolator(local_grid, f_on_grid)
+    f_interp = interpolator.__call__(point)
+
+    return f_interp
+
+
+def interpolate_locally_batch(points, grid, func):
+
+    f_interp = np.full(points.shape[0], np.nan)
+    for idx in range(points.shape[0]):
+        local_grid = get_local_grid_step(points[idx, :], grid)
+        f_interp[idx] = interpolate_locally_step(points[idx, :], local_grid, func)
+
+    return f_interp

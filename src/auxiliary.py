@@ -60,6 +60,29 @@ def get_corner_points(grid):
     return corner_points
 
 
+def get_local_grid_step(point, grid):
+
+    dims = len(grid)
+
+    grids_bounds = []
+    for idx in range(dims):
+        tmp = np.searchsorted(grid[idx], point[idx])
+        grids_bounds.append([grid[idx][tmp - 1], grid[idx][tmp]])
+
+    local_grid = pd.DataFrame(
+        index=pd.MultiIndex.from_product(grids_bounds, names=range(dims),)
+    ).reset_index()
+
+    local_grid = np.array(object=local_grid)
+
+    return local_grid
+
+
+# def get_local_grid_batch(points, grid):
+#
+#     return local_grids
+
+
 def state_to_id(state, dims_state_grid):
     id = 0
     for i in range(len(dims_state_grid) - 1):
