@@ -66,6 +66,19 @@ def get_dims_state_grid(dims, n_gridpoints):
 
 
 def get_corner_points(grid):
+    """Generate array of corner points of the state space.
+
+    Parameters
+    ----------
+    grid : dict
+        Dictionary of dimensions (keys) and corresponding 1d-grids (values)
+
+    Returns
+    -------
+    corner_points: np.array(2^d, d)
+        Array of corner points of state space characterized by *grid*
+
+    """
 
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
@@ -84,14 +97,30 @@ def get_corner_points(grid):
     return corner_points
 
 
-def get_local_grid_step(point, grid):
+def get_local_grid(point, grid):
+    """Generate array of points on *grid* defining smallest on-grid hypercube
+        containing *point*
+
+    Parameters
+    ----------
+    point: np.array(1, d)
+        Values of point for which closest on-grid cube is required
+    grid : dict
+        Dictionary of dimensions (keys) and corresponding 1d-grids (values)
+
+    Returns
+    -------
+    local_grid: np.array(2^d, d)
+        Array of corner points of smallest hypercube on *grid* containing *point*
+
+    """
 
     dims = len(grid)
 
-    grids_bounds = []
-    for idx in range(dims):
-        tmp = np.searchsorted(grid[idx], point[idx])
-        grids_bounds.append([grid[idx][tmp - 1], grid[idx][tmp]])
+    grids_bounds = np.full((dims, 2), np.nan)
+    for dim in range(dims):
+        tmp = np.searchsorted(grid[dim], point[dim])
+        grids_bounds[dim, :] = [grid[dim][tmp - 1], grid[dim][tmp]]
 
     local_grid = pd.DataFrame(
         index=pd.MultiIndex.from_product(grids_bounds, names=range(dims),)
@@ -100,11 +129,6 @@ def get_local_grid_step(point, grid):
     local_grid = np.array(object=local_grid)
 
     return local_grid
-
-
-# def get_local_grid_batch(points, grid):
-#
-#     return local_grids
 
 
 def state_to_id(state, dims_state_grid):
