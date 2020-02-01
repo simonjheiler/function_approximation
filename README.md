@@ -36,7 +36,6 @@ The following elements are under CI control:
 
 * Comparison of alternative interpolation methods: 
    - multidimensional spline interpolation
-   - linear sparse grid methods
    - smolyak methods
 
 * Adaptations required for functions with discrete domain
