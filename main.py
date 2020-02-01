@@ -104,9 +104,9 @@ def execute_study(study_params):
                     "spline"
                 ]["interpolation points"][iteration]
             elif interpolation_method == "smolyak":
-                interp_params["smolyak"]["mu"] = study_params["smolyak"]["mu"][
-                    iteration
-                ]
+                interp_params["smolyak"]["sparse grid level"] = study_params["smolyak"][
+                    "sparse grid levels"
+                ][iteration]
             elif interpolation_method == "sparse_cc":
                 interp_params["sparse_cc"]["sparse grid level"] = study_params[
                     "sparse_cc"
