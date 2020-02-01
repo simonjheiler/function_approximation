@@ -1,3 +1,5 @@
+"""Collection of auxiliary functions for simulation study
+"""
 import pdb  # noqa F401
 
 import numpy as np
@@ -12,7 +14,29 @@ import pandas as pd
 
 
 def get_grid(grid_params, dims):
+    """Generate grid representation of the state space.
 
+    *grid_params* stores default values for bounds and grid density; the function
+    constructs a grid with dimensionality *dims* from these defaults
+
+    Parameters
+    ----------
+    grid_params: dict
+        "orders": np.arr
+            Number of gridpoints by dimension
+        "lower bounds": np.array
+            Lower bounds of domain by dimension
+        "upper bounds": np.array
+            Upper bounds of domain by dimension
+    dims : int
+       Dimensionality of the grid to be constructed
+
+    Returns
+    -------
+    grid : dict
+       Dictionary of dimensions (keys) and corresponding 1d-grids (values)
+
+    """
     orders = np.array(object=grid_params["orders"][:dims], dtype=int)
     grid_min = np.array(object=grid_params["lower bounds"][:dims], dtype=float)
     grid_max = np.array(object=grid_params["upper bounds"][:dims], dtype=float)
