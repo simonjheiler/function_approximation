@@ -202,7 +202,16 @@ def inputs_from_ids_batch(index, dims_state_grid, grid):
 
 
 def states_to_ids_batch(states, dims_state_grid):
-
+    """Translate points to index values.
+    
+    Parameters
+    ----------
+ 
+ 
+    Returns
+    -------
+ 
+    """
     n_states, _ = states.shape
     ids = []
 
@@ -338,7 +347,21 @@ def rmsre(x1, x2, axis=0):
 
 
 def get_interpolation_points(n_interpolation_points, grid, seed):
+    """Get a set of random points on the domain of *grid*.
 
+    Parameters
+    ----------
+    n_interpolation_points : int
+       Number of random points to generate.
+    grid: dict
+        Specification of state space from which to draw the points.
+    seed : int
+       Seed for random number generation.
+    Returns
+    -------
+    interpolation_points : np.ndarray(n, d)
+       Random points from the state space.
+    """
     np.random.seed(seed)
 
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
