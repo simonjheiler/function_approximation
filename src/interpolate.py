@@ -18,7 +18,32 @@ from src.sparsegrid import SparseInterpolator
 
 
 def get_interpolation_grid_regular(dims, grid_min, grid_max, interp_params):
+    """Generate a regular (evenly-spaced) multidimensional interpolation grid.
 
+    Parameters
+    ----------
+    dims : int
+        Dimensionality of the grid to be constructed
+    grid_min: np.array(1, d)
+        Lower bounds of the domain
+    grid_max: np.array(1, d)
+        Upper bounds of the domain
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear"
+        "spline": dict
+            Interpolation parameters for method "spline"
+        "smolyak": dict
+            Interpolation parameters for method "smolyak"
+        "sparse": dict
+            Interpolation parameters for method "sparse"
+    Returns
+    -------
+    grid_interp: np.array(2^d, d)
+        Input values of the interpolation nodes 
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # load interpolation parameters
     interpolation_points = interp_params["linear"]["interpolation points"]
 
@@ -40,7 +65,50 @@ def get_interpolation_grid_regular(dims, grid_min, grid_max, interp_params):
 
 
 def get_interpolation_grid_sparse(dims, grid_min, grid_max, interp_params):
+    """Generate a sparse multidimensional interpolation grid.
 
+    The function uses the sparseGrid class from pysg.py and is here used
+    for illustrational purposes only. 
+    (see Garcke, Jochen. (2006). Sparse grid tutorial, 
+    https://people.sc.fsu.edu/~jburkardt/py_src/sparse_grid/sparse_grid.html)
+
+    Parameters
+    ----------
+    dims : int
+        Dimensionality of the grid to be constructed
+    grid_min: np.array(1, d)
+        Lower bounds of the domain
+    grid_max: np.array(1, d)
+        Upper bounds of the domain
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear":
+                interpolator: str "interpolate_linear"
+                grid method: str "regular" or "sparse" (method for interpolation
+                    grid)
+                sparse grid level: int (depth of sparse grid)
+                interpolation points
+        "spline": dict
+            Interpolation parameters for method "spline":
+                interpolator: str "interpolate_spline"
+                interpolation points: int (number of grid points per dimension for 
+                    interpolation grid)
+        "smolyak": dict
+            Interpolation parameters for method "smolyak":
+                interpolator: str "interpolate_smolyak"
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+        "sparse": dict
+            Interpolation parameters for method "sparse":
+                interpolator: str "interpolate_sparse"
+                functional family: str "CC" for Clenshaw-Curtis, "CH" for Chebychev
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+    Returns
+    -------
+    grid_interp: np.array(2^d, d)
+        Input values of the interpolation nodes 
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # load interpolation parameters
     level = interp_params["linear"]["sparse grid level"]
 
@@ -99,7 +167,47 @@ def get_not_interpolated_indicator_random(interpolation_points, n_states, seed):
 
 
 def interpolate_linear(points, grid, func, interp_params):
+    """Interpolate *func* at *points* using multi-linear interpolation.
 
+    This function is a wrapper for the scipy.interpolate.LinearNDInterpolator
+    interpolator.
+    
+    Parameters
+    ----------
+    points : np.array(n, d)
+        Input values of points to interpolate
+    grid : dict
+        Total number of states in period.
+    func : functional
+        Function to interpolate
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear":
+                interpolator: str "interpolate_linear"
+                grid method: str "regular" or "sparse" (method for interpolation
+                    grid)
+                sparse grid level: int (depth of sparse grid)
+                interpolation points
+        "spline": dict
+            Interpolation parameters for method "spline":
+                interpolator: str "interpolate_spline"
+                interpolation points: int (number of grid points per dimension for 
+                    interpolation grid)
+        "smolyak": dict
+            Interpolation parameters for method "smolyak":
+                interpolator: str "interpolate_smolyak"
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+        "sparse": dict
+            Interpolation parameters for method "sparse":
+                interpolator: str "interpolate_sparse"
+                functional family: str "CC" for Clenshaw-Curtis, "CH" for Chebychev
+                sparse grid level: int (depth of sparse grid / order of polynomial)    Returns
+    -------
+    results_interp : np.array(n, 1)
+        Interpolated function values of *func* at *points*
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # get number of states, number of dimensions and index of states
     dims = len(grid)
     grid_min = np.array(object=[min(v) for _, v in grid.items()])
@@ -139,7 +247,48 @@ def interpolate_linear(points, grid, func, interp_params):
 
 
 def interpolate_smolyak(points, grid, func, interp_params):
+    """Interpolate *func* at *points* using Smolyak sparse grid
+    interpolation.
 
+    This function is a wrapper for the dolo.numeric.interpolate.smolyak 
+    interpolator.
+    
+    Parameters
+    ----------
+    points : np.array(n, d)
+        Input values of points to interpolate
+    grid : dict
+        Total number of states in period.
+    func : functional
+        Function to interpolate
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear":
+                interpolator: str "interpolate_linear"
+                grid method: str "regular" or "sparse" (method for interpolation
+                    grid)
+                sparse grid level: int (depth of sparse grid)
+                interpolation points
+        "spline": dict
+            Interpolation parameters for method "spline":
+                interpolator: str "interpolate_spline"
+                interpolation points: int (number of grid points per dimension for 
+                    interpolation grid)
+        "smolyak": dict
+            Interpolation parameters for method "smolyak":
+                interpolator: str "interpolate_smolyak"
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+        "sparse": dict
+            Interpolation parameters for method "sparse":
+                interpolator: str "interpolate_sparse"
+                functional family: str "CC" for Clenshaw-Curtis, "CH" for Chebychev
+                sparse grid level: int (depth of sparse grid / order of polynomial)    Returns
+    -------
+    results_interp : np.array(n, 1)
+        Interpolated function values of *func* at *points*
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # load interpolation parameters
     level = interp_params["smolyak"]["sparse grid level"]
 
@@ -169,7 +318,49 @@ def interpolate_smolyak(points, grid, func, interp_params):
 
 
 def interpolate_spline(points, grid, func, interp_params):
+    """Interpolate *func* at *points* using multi-dimensional spline 
+    interpolation.
 
+    This function is a wrapper for the dolo.numeric.interpolate.spline 
+    interpolator.
+    
+    Parameters
+    ----------
+    points : np.array(n, d)
+        Input values of points to interpolate
+    grid : dict
+        Total number of states in period.
+    func : functional
+        Function to interpolate
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear":
+                interpolator: str "interpolate_linear"
+                grid method: str "regular" or "sparse" (method for interpolation
+                    grid)
+                sparse grid level: int (depth of sparse grid)
+                interpolation points
+        "spline": dict
+            Interpolation parameters for method "spline":
+                interpolator: str "interpolate_spline"
+                interpolation points: int (number of grid points per dimension for 
+                    interpolation grid)
+        "smolyak": dict
+            Interpolation parameters for method "smolyak":
+                interpolator: str "interpolate_smolyak"
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+        "sparse": dict
+            Interpolation parameters for method "sparse":
+                interpolator: str "interpolate_sparse"
+                functional family: str "CC" for Clenshaw-Curtis, "CH" for Chebychev
+                sparse grid level: int (depth of sparse grid / order of polynomial)    
+    Returns
+    -------
+    results_interp : np.array(n, 1)
+        Interpolated function values of *func* at *points*
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # load interpolation parameters
     interpolation_points = interp_params["spline"]["interpolation points"]
 
@@ -197,7 +388,49 @@ def interpolate_spline(points, grid, func, interp_params):
 
 
 def interpolate_sparse(points, grid, func, interp_params):
+    """Interpolate *func* at *points* using multi-linear interpolation.
 
+    This function is a wrapper for the sparsegrid interpolator written by
+    ...
+ 
+ 
+    Parameters
+    ----------
+    points : np.array(n, d)
+        Input values of points to interpolate
+    grid : dict
+        Total number of states in period.
+    func : functional
+        Function to interpolate
+    interp_params: dict
+        "linear": dict
+            Interpolation parameters for method "linear":
+                interpolator: str "interpolate_linear"
+                grid method: str "regular" or "sparse" (method for interpolation
+                    grid)
+                sparse grid level: int (depth of sparse grid)
+                interpolation points
+        "spline": dict
+            Interpolation parameters for method "spline":
+                interpolator: str "interpolate_spline"
+                interpolation points: int (number of grid points per dimension for 
+                    interpolation grid)
+        "smolyak": dict
+            Interpolation parameters for method "smolyak":
+                interpolator: str "interpolate_smolyak"
+                sparse grid level: int (depth of sparse grid / order of polynomial)
+        "sparse": dict
+            Interpolation parameters for method "sparse":
+                interpolator: str "interpolate_sparse"
+                functional family: str "CC" for Clenshaw-Curtis, "CH" for Chebychev
+                sparse grid level: int (depth of sparse grid / order of polynomial)    
+    Returns
+    -------
+    results_interp : np.array(n, 1)
+        Interpolated function values of *func* at *points*
+    n_gridpoints_effective: int
+        Number of interpolation nodes
+    """
     # load interpolation parameters
     level = interp_params["sparse"]["sparse grid level"]
     interpolation_type = interp_params["sparse"]["polynomial family"]
@@ -223,7 +456,24 @@ def interpolate_sparse(points, grid, func, interp_params):
 
 
 def interpolate_locally_step(point, local_grid, func):
+    """Interpolate *func* at *point* using multi-linear interpolation.
 
+    This function uses linear interpolation to locally approximate *func*
+    at the off-grid point *point* given the on-grid hypercube *local_grid*
+        
+    Parameters
+    ----------
+    point : np.array(1, d)
+        Input values of point to interpolate
+    local_grid : np.array(2^d, d)
+        Input values of smallest on-grid hypercube containing *point*
+    func : functional
+        Function to interpolate
+    Returns
+    -------
+    f_interp : float
+        Interpolated function value of *func* at *point*
+    """
     f_on_grid = func(local_grid)
     interpolator = sp_interpolate.LinearNDInterpolator(local_grid, f_on_grid)
     f_interp = interpolator.__call__(point)
@@ -232,7 +482,26 @@ def interpolate_locally_step(point, local_grid, func):
 
 
 def interpolate_locally_batch(points, grid, func):
+    """Interpolate *func* at *points* using multi-linear interpolation.
 
+    This function is a wrapper for obtaining local off-grid approximations.
+    It first invokes get_local_grid to obtain the smallest on-grid hypercube
+    containing a given point and the invokes interpolate_locally_step to 
+    approximate the function value at the given (off-grid) point.
+    
+    Parameters
+    ----------
+    points : np.array(n, d)
+        Input values of point to interpolate
+    local_grid : np.array(2^d, d)
+        Input values of smallest on-grid hypercube containing *point*
+    func : functional
+        Function to interpolate
+    Returns
+    -------
+    f_interp : np.array(n, 1)
+        Interpolated function value of *func* at *point*
+    """
     f_interp = np.full(points.shape[0], np.nan)
     for idx in range(points.shape[0]):
         local_grid = get_local_grid(points[idx, :], grid)
