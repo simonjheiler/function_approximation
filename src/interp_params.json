@@ -1,16 +1,19 @@
 {
   "linear": {
     "grid method": "sparse",
-    "sparse grid levels": 5,
+    "evaluate off-grid": "True",
+    "sparse grid level": 3,
     "interpolation points": 3
   },
   "smolyak": {
-    "grid method": "regular",
-    "sparse grid levels": 2
+    "evaluate off-grid": "True",
+    "sparse grid level": 3
   },
   "spline": {
-    "grid method": "regular",
-    "sparse grid levels": 5,
     "interpolation points": 3
+  },
+  "sparse": {
+    "polynomial family": "CC",
+    "sparse grid level": 3
   }
 }

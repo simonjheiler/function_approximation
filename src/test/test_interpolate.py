@@ -157,7 +157,7 @@ def test_get_interpolation_grid_regular_3D_small(setup_get_interpolation_grid):
 
 
 def test_get_interpolation_grid_sparse_2D_2L(setup_get_interpolation_grid):
-    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid levels"] = 2
+    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid level"] = 2
     grid_interp_expected = np.array(
         object=[[5.0, 5.0], [5.0, 7.0], [5.0, 3.0], [7.0, 5.0], [3.0, 5.0]],
         dtype=float,
@@ -171,7 +171,7 @@ def test_get_interpolation_grid_sparse_2D_2L(setup_get_interpolation_grid):
 
 
 def test_get_interpolation_grid_sparse_2D_3L(setup_get_interpolation_grid):
-    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid levels"] = 3
+    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid level"] = 3
     grid_interp_expected = np.array(
         object=[
             [5.0, 5.0],
@@ -210,7 +210,7 @@ def test_get_interpolation_grid_sparse_3D_2L(setup_get_interpolation_grid):
     setup_get_interpolation_grid["grid_max"] = np.array(
         object=[9.0, 9.0, 9.0], dtype=float
     )
-    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid levels"] = 2
+    setup_get_interpolation_grid["interp_params"]["linear"]["sparse grid level"] = 2
     grid_interp_expected = np.array(
         object=[
             [5.0, 5.0, 5.0],

@@ -10,6 +10,7 @@ from interpolation.splines import CubicSpline as spline
 from src.auxiliary import get_corner_points
 from src.auxiliary import get_local_grid_step
 from src.pysg import sparseGrid
+from src.sparsegrid import SparseInterpolator
 
 #########################################################################
 # FUNCTIONS
@@ -41,7 +42,7 @@ def get_interpolation_grid_regular(dims, grid_min, grid_max, interp_params):
 def get_interpolation_grid_sparse(dims, grid_min, grid_max, interp_params):
 
     # load interpolation parameters
-    level = interp_params["linear"]["sparse grid levels"]
+    level = interp_params["linear"]["sparse grid level"]
 
     # generate grid
     sparse_grid = sparseGrid(dims, level)
@@ -121,7 +122,10 @@ def interpolate_linear(points, grid, func, interp_params):
     )
 
     # evaluate function on grid
-    f_on_grid = func(grid_interp)
+    if interp_params["linear"]["evaluate off-grid"] == "True":
+        f_on_grid = func(grid_interp)
+    elif interp_params["linear"]["evaluate off-grid"] == "False":
+        f_on_grid = interpolate_locally_batch(grid_interp, grid, func)
 
     # generate interpolator
     interpolator = sp_interpolate.LinearNDInterpolator(
@@ -137,7 +141,7 @@ def interpolate_linear(points, grid, func, interp_params):
 def interpolate_smolyak(points, grid, func, interp_params):
 
     # load interpolation parameters
-    mu = interp_params["smolyak"]["mu"]
+    level = interp_params["smolyak"]["sparse grid level"]
 
     # get number of states, number of dimensions and index of states
     dims = len(grid)
@@ -145,13 +149,15 @@ def interpolate_smolyak(points, grid, func, interp_params):
     grid_max = np.array(object=[max(v) for _, v in grid.items()])
 
     # generate smolyak grid
-    s_grid = sg(dims, mu, grid_min, grid_max)
+    s_grid = sg(dims, level, grid_min, grid_max)
     n_gridpoints_effective = len(s_grid.grid)
     grid_interp = s_grid.grid
 
     # evaluate function on grid
-    # f_on_grid = func(grid_interp)
-    f_on_grid = interpolate_locally_batch(grid_interp, grid, func)
+    if interp_params["smolyak"]["evaluate off-grid"] == "True":
+        f_on_grid = func(grid_interp)
+    elif interp_params["smolyak"]["evaluate off-grid"] == "False":
+        f_on_grid = interpolate_locally_batch(grid_interp, grid, func)
 
     # generate interpolator
     interpolator = si(s_grid, f_on_grid)
@@ -186,6 +192,32 @@ def interpolate_spline(points, grid, func, interp_params):
 
     # calculate interpolated points
     results_interp = interpolator(points)
+
+    return results_interp, n_gridpoints_effective
+
+
+def interpolate_sparse(points, grid, func, interp_params):
+
+    # load interpolation parameters
+    level = interp_params["sparse"]["sparse grid level"]
+    interpolation_type = interp_params["sparse"]["polynomial family"]
+
+    # get number of states, number of dimensions and index of states
+    dims = len(grid)
+    grid_min = np.array(object=[min(v) for _, v in grid.items()])
+    grid_max = np.array(object=[max(v) for _, v in grid.items()])
+
+    intval = np.asarray([grid_min, grid_max])
+
+    # generate interpolator
+    interp = SparseInterpolator(level, dims, interpolation_type, intval)
+
+    # evaluate function on grid
+    _ = interp.fit(func, points)
+
+    # generate interpolator
+    results_interp = interp.evaluate(points)
+    n_gridpoints_effective = len(interp.grid)
 
     return results_interp, n_gridpoints_effective
 
