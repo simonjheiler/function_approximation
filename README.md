@@ -1,6 +1,7 @@
 ## Project overview
 
-* This repository provides a simulation study of alternative function interpolation / approximation methods.
+* This repository provides a simulation study of alternative function interpolation / approximation methods
+* The goal is to give an overview of multi-dimensional interpolation methods and to assess implementability for respy
 
 ## Notebook viewer
 
