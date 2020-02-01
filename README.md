@@ -14,30 +14,36 @@
 
 ## Reproducibility
 
-Current build status (Travis CI):
+To ensure reproducibility, this repository is under continuous integration control using Travis CI. 
+
+Current build status:
 
 [![Build Status](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler.svg?branch=master)](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler)
 
-Under CI control:
+The following elements are under CI control:
 * testing harness (tests contained in ./src/)
-* notebooks
+* notebooks in ROOT
 
 
 ## Structure of notebook
 
-* presentation of baseline article with proper citation and brief summary
+* Motivation of the study and relation to respy
 
-* using causal graphs to illustrate the authors' identification strategy
+* Introduction of the test functions used for the study
 
-* replication of selected key results
+* Benchmark case: multilinear interpolation on a regular grid
 
-* critical assessment of quality
+* Comparison of alternative interpolation methods: multidimensional spline interpolation, linear sparse grid methods, smolyak methods
 
-* independent contribution, e.g. additional external evidence, robustness checks, visualization
+* Adaptations required for functions with discrete domain
+
+* Outlook on potential implementation in respy
 
 
 ## References
 
+* Surjanovic, S. & Bingham, D. (2013). Virtual Library of Simulation Experiments: Test Functions and Datasets. Retrieved February 1, 2020, from http://www.sfu.ca/~ssurjano.
+* Zhou, Y. (1998). Adaptive importance sampling for integration. Ph.D. Thesis, Stanford University.
 
 
 ## License
