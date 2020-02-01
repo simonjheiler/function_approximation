@@ -18,13 +18,22 @@ import numpy as np
 def borehole_readable(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    Args:
-        inputs (np.array): inputs with entries
+    For comparability and flexibility in the simulation study, the input 
+    interface flexibly allows for inputs of different dimensionality. To
+    evaluate the function at the respective points, default values are 
+    appended for ommitted input dimensions (mean of respective domain, see 
+    input_default below).
+    
+    This is the readable implementation for debugging and testing.
 
-    Returns:
-        output (np.array)
-
-
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
     """
     input_default = [89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
 
@@ -57,14 +66,20 @@ def borehole_readable(input):
 
 @nb.njit
 def borehole_step_numba_iter(input):
-    """Calculate the flow through a borehole given *inputs*.
+    """Calculate the flow through a borehole given one point *input*.
 
-    Args:
-        inputs (np.ndarray): inputs with entries
-
-    Returns:
-        output (float)
-
+    Evaluate the borehole function for one input value. 
+    
+    This is the numba implementation of the iterative step function.
+    
+    Params
+    -------
+        inputs : np.array(1, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : float
+            function values at inputs
     """
     x1 = input[0]
     x2 = input[1]
@@ -86,14 +101,20 @@ def borehole_step_numba_iter(input):
 
 @nb.njit
 def borehole_step_numba_vectorize(input):
-    """Calculate the flow through a borehole given *inputs*.
+    """Calculate the flow through a borehole given one point *input*.
 
-    Args:
-    inputs (np.ndarray): inputs with entries
-
-    Returns:
-    output (float)
-
+    Evaluate the borehole function for one input value. 
+    
+    This is the numba implementation of the vectorized step function.
+    
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
     """
     x1 = input[..., 0]
     x2 = input[..., 1]
@@ -116,12 +137,22 @@ def borehole_step_numba_vectorize(input):
 def borehole_wrapper_iter(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    Args:
-        inputs (np.ndarray): inputs with entries
+    For comparability and flexibility in the simulation study, the input 
+    interface flexibly allows for inputs of different dimensionality. To
+    evaluate the function at the respective points, default values are 
+    appended for ommitted input dimensions (mean of respective domain, see 
+    input_default below).
+    
+    This is the wrapper for the iterative numba implementation.
 
-    Returns:
-        output (float)
-
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
     """
     input_default = np.array(
         object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55],
@@ -152,12 +183,22 @@ def borehole_wrapper_iter(input):
 def borehole_wrapper_vectorize(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    Args:
-        inputs (np.ndarray): inputs with entries
+    For comparability and flexibility in the simulation study, the input 
+    interface flexibly allows for inputs of different dimensionality. To
+    evaluate the function at the respective points, default values are 
+    appended for ommitted input dimensions (mean of respective domain, see 
+    input_default below).
+    
+    This is the wrapper for the vectorized numba implementation.
 
-    Returns:
-        output (float)
-
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
     """
     input_default = np.array(
         object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
@@ -186,7 +227,21 @@ def borehole_wrapper_vectorize(input):
 
 
 def zhou_phi_readable(input):
+    """Calculate the flow through a borehole given one point *input*.
 
+    Evaluate the Zhou (1998) phi function for one input value. 
+    
+    This is the readable implementation for debugging and testing.
+    
+    Params
+    -------
+        input : np.array(1, d)
+            input values of points to evaluate
+    Returns
+    -------
+        phi : float
+            function values at inputs
+    """
     d = len(input)
     phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input) ** 2)
 
@@ -194,7 +249,21 @@ def zhou_phi_readable(input):
 
 
 def zhou_phi_vectorize(input):
+    """Calculate the flow through a borehole given one point *input*.
 
+    Evaluate the Zhou (1998) phi function for multiple input values. 
+    
+    This is the vectorized implementation.
+    
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        phi : np.array(n, 1)
+            function values at inputs
+    """
     d = input.shape[1]
     phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input, axis=1) ** 2)
 
@@ -203,7 +272,21 @@ def zhou_phi_vectorize(input):
 
 @nb.njit
 def zhou_phi_numba(input):
+    """Calculate the flow through a borehole given one point *input*.
 
+    Evaluate the Zhou (1998) phi function for one input value. 
+    
+    This is the iterative numba implementation.
+    
+    Params
+    -------
+        inputs : np.array(1, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
+    """
     d = len(input)
     phi = (2 * np.pi) ** (-d / 2) * np.exp(-0.5 * np.linalg.norm(input) ** 2)
 
@@ -211,7 +294,20 @@ def zhou_phi_numba(input):
 
 
 def zhou_readable(input):
+    """Calculate the Zhou (1998) function given *inputs*.
 
+    This is the readable implementation for debugging and testing.
+
+
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
+    """
     d = input.shape[1]
 
     output = []
@@ -233,7 +329,19 @@ def zhou_readable(input):
 
 
 def zhou_vectorize(input):
+    """Calculate the Zhou (1998) function given *inputs*.
 
+    This is the wrapper for the vectorized implementation.
+
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
+    """
     d = input.shape[1]
 
     output = (
@@ -252,7 +360,19 @@ def zhou_vectorize(input):
 
 @nb.njit
 def zhou_numba(input):
+    """Calculate the Zhou (1998) function given *inputs*.
 
+    This is the wrapper for the iterative numba implementation.
+
+    Params
+    -------
+        inputs : np.array(n, d)
+            input values of points to evaluate
+    Returns
+    -------
+        output : np.array(n, 1)
+            function values at inputs
+    """
     d = input.shape[1]
     output = np.full(input.shape[0], np.nan)
 
