@@ -33,7 +33,10 @@ The following elements are under CI control:
 
 * Benchmark case: multilinear interpolation on a regular grid
 
-* Comparison of alternative interpolation methods: multidimensional spline interpolation, linear sparse grid methods, smolyak methods
+* Comparison of alternative interpolation methods: 
+   - multidimensional spline interpolation
+   - linear sparse grid methods
+   - smolyak methods
 
 * Adaptations required for functions with discrete domain
 
