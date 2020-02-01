@@ -8,7 +8,7 @@ from interpolation.smolyak.interp import SmolyakInterp as si
 from interpolation.splines import CubicSpline as spline
 
 from src.auxiliary import get_corner_points
-from src.auxiliary import get_local_grid_step
+from src.auxiliary import get_local_grid
 from src.pysg import sparseGrid
 from src.sparsegrid import SparseInterpolator
 
@@ -235,7 +235,7 @@ def interpolate_locally_batch(points, grid, func):
 
     f_interp = np.full(points.shape[0], np.nan)
     for idx in range(points.shape[0]):
-        local_grid = get_local_grid_step(points[idx, :], grid)
+        local_grid = get_local_grid(points[idx, :], grid)
         f_interp[idx] = interpolate_locally_step(points[idx, :], local_grid, func)
 
     return f_interp

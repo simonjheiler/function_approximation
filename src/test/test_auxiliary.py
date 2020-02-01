@@ -10,7 +10,7 @@ import pytest
 
 from src.auxiliary import get_corner_points
 from src.auxiliary import get_grid
-from src.auxiliary import get_local_grid_step
+from src.auxiliary import get_local_grid
 from src.auxiliary import inputs_from_ids_batch
 from src.auxiliary import inputs_from_state
 from src.auxiliary import mse
@@ -87,7 +87,7 @@ def setup_get_grid():
 
 
 @pytest.fixture
-def setup_get_local_grid_step():
+def setup_get_local_grid():
     out = {}
     out["point"] = np.array(object=[1.7, 1.5, 2.5])
     out["grid"] = {
@@ -244,7 +244,7 @@ def test_rmsre(setup_approximation_error):
     assert_almost_equal(actual, expected, decimal=12)
 
 
-def test_get_local_grid_step(setup_get_local_grid_step):
+def test_get_local_grid(setup_get_local_grid):
     expected = np.array(
         object=[
             [1.5, 1.0, 2.0],
@@ -258,5 +258,5 @@ def test_get_local_grid_step(setup_get_local_grid_step):
         ],
         dtype=float,
     )
-    actual = get_local_grid_step(**setup_get_local_grid_step)
+    actual = get_local_grid(**setup_get_local_grid)
     assert_array_equal(actual, expected)
