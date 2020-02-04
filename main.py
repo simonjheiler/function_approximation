@@ -1,4 +1,4 @@
-import copy
+import copy  # noqa:F401
 import json
 import os
 import pdb  # noqa:F401
@@ -107,10 +107,10 @@ def execute_study(study_params):
                 interp_params["smolyak"]["sparse grid level"] = study_params["smolyak"][
                     "sparse grid levels"
                 ][iteration]
-            elif interpolation_method == "sparse_cc":
-                interp_params["sparse_cc"]["sparse grid level"] = study_params[
-                    "sparse_cc"
-                ]["sparse grid levels"][iteration]
+            elif interpolation_method == "sparse":
+                interp_params["sparse"]["sparse grid level"] = study_params["sparse"][
+                    "sparse grid levels"
+                ][iteration]
 
             # interpolate and capture computation time
             start = time()
@@ -222,30 +222,7 @@ def compare_results(results_1, results_2, params_1, params_2):
 
 if __name__ == "__main__":
 
-    # create instance for linear regular parametrization and set parameters
-    params_linear_regular = copy.deepcopy(params_default)
-    params_linear_regular["controls"]["interpolation method"] = "linear"
-    params_linear_regular["controls"]["grid_method"] = "regular"
-    params_linear_regular["controls"]["evaluate off-grid"] = "True"
-    params_linear_regular["controls"]["dims"] = [2, 3, 4]
-    params_linear_regular["controls"]["iterations"] = 5
-
-    # create instance for zhou function
-    params_zhou_linear_regular = copy.deepcopy(params_linear_regular)
-    params_zhou_linear_regular["controls"]["function to approximate"] = "zhou_vectorize"
-
-    # create instance for borehole function
-    params_borehole_linear_regular = copy.deepcopy(params_linear_regular)
-    params_borehole_linear_regular["controls"][
-        "function to approximate"
-    ] = "borehole_wrapper_vectorize"
-
-    results_zhou_linear_regular = execute_study(params_zhou_linear_regular)
-    results_borehole_linear_regular = execute_study(params_borehole_linear_regular)
-
-    print(results_zhou_linear_regular["rmse"])
-    print(results_borehole_linear_regular["rmse"])
+    results = execute_study(params_default)
 
     # plot results
-    plot_results(results_zhou_linear_regular, params_zhou_linear_regular)
-    plot_results(results_borehole_linear_regular, params_borehole_linear_regular)
+    plot_results(results, params_default)

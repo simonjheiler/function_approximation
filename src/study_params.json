@@ -1,8 +1,8 @@
 {
   "controls": {
-    "interpolation method": "sparse",
-    "grid method": "sparse",
-    "evaluate off-grid": "True",
+    "interpolation method": "linear",
+    "grid method": "regular",
+    "evaluate off-grid": "False",
     "grid density": "medium",
     "dims": [
       2,
@@ -11,7 +11,7 @@
     ],
     "iterations": 5,
     "function to approximate": "zhou_vectorize",
-    "number of points for accuracy check": 100,
+    "number of points for accuracy check": 1000,
     "seed for accuracy check": 123
   },
   "grid": {

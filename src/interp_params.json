@@ -10,6 +10,7 @@
     "sparse grid level": 3
   },
   "spline": {
+    "evaluate off-grid": "True",
     "interpolation points": 3
   },
   "sparse": {
