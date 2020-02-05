@@ -434,7 +434,7 @@ def interpolate_sparse(points, grid, func, interp_params):
     # generate interpolator
     results_interp = interp.evaluate(points)
     n_gridpoints_effective = len(interp.grid)
-
+    pdb.set_trace()
     return results_interp, n_gridpoints_effective
 
 
