@@ -304,7 +304,7 @@ def compare_fit_2d_iter(study_params, interpolation_params, iteration):
         cstride=1,
         cmap=plt.cm.magma,
     )
-    ax.set_zlim(0.0, ax.get_zlim()[1] * 2)
+    # ax.set_zlim(0.0, ax.get_zlim()[1] * 2)
 
     plt.show()
     print("-------------------------------------------------------------------")
