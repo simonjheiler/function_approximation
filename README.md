@@ -19,7 +19,7 @@ To ensure reproducibility, this repository is under continuous integration contr
 
 Current build status:
 
-[![Build Status](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler.svg?branch=master)](https://travis-ci.com/simonjheiler/function_approximation.svg?branch=master)
+[![Build Status](https://travis-ci.com/simonjheiler/function_approximation.svg?branch=master)](https://travis-ci.com/simonjheiler/function_approximation)
 
 The following elements are under CI control:
 * testing harness (tests contained in ./src/)
