@@ -10,16 +10,16 @@
    <img align="center"
   src="https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.png"
       width="109" height="20">
-      
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/HumanCapitalAnalysis/student-project-simonjheiler/master)
 
 ## Reproducibility
 
-To ensure reproducibility, this repository is under continuous integration control using Travis CI. 
+To ensure reproducibility, this repository is under continuous integration control using Travis CI.
 
 Current build status:
 
-[![Build Status](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler.svg?branch=master)](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler)
+[![Build Status](https://travis-ci.org/HumanCapitalAnalysis/student-project-simonjheiler.svg?branch=master)](https://travis-ci.com/simonjheiler/function_approximation.svg?branch=master)
 
 The following elements are under CI control:
 * testing harness (tests contained in ./src/)
@@ -34,7 +34,7 @@ The following elements are under CI control:
 
 * Benchmark case: multilinear interpolation on a regular grid
 
-* Comparison of alternative interpolation methods: 
+* Comparison of alternative interpolation methods:
    - multidimensional spline interpolation
    - smolyak methods
 
