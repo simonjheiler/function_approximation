@@ -342,7 +342,7 @@ class SparseInterpolator:
         n_dimensions,
         interpolation_type="CC",
         interpolation_interval=None,
-        tol=1e-3,
+        tol=1e-15,
     ):
         """
         Parameters

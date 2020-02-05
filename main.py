@@ -37,32 +37,38 @@ with open("./src/study_params.json") as json_file:
 
 if __name__ == "__main__":
 
+    params_default = copy.deepcopy(study_params)
+    interp_params = copy.deepcopy(interpolation_params)
+
     # create instance for study parameters
-    params = copy.deepcopy(study_params)
-    params["controls"]["interpolation method"] = "sparse"
-    params["controls"]["grid_method"] = "sparse"
-    params["controls"]["evaluate off-grid"] = "True"
-    params["controls"]["iterations"] = 3
-    params["controls"]["grid density"] = "medium"
+    params_sparse_ch = copy.deepcopy(params_default)
+    params_sparse_ch["controls"]["interpolation method"] = "sparse"
+    params_sparse_ch["controls"]["grid_method"] = "sparse"
+    params_sparse_ch["controls"]["evaluate off-grid"] = "True"
+    params_sparse_ch["controls"]["iterations"] = 3
+    params_sparse_ch["controls"]["grid density"] = "medium"
 
     # this implementation only works for dim <= 2
-    params["controls"]["dims"] = [2]
+    params_sparse_ch["controls"]["dims"] = [2]
 
     # create instance for interpolation parameters
-    interp_params = copy.deepcopy(interpolation_params)
-    interp_params["sparse"]["polynomial family"] = "CH"
+    interp_params_sparse_ch = copy.deepcopy(interp_params)
+    interp_params_sparse_ch["sparse"]["polynomial family"] = "CH"
 
     # create instance for zhou function
-    params_zhou = copy.deepcopy(params)
-    params_zhou["controls"]["function to approximate"] = "zhou_vectorize"
+    params_zhou_sparse_ch = copy.deepcopy(params_sparse_ch)
+    params_zhou_sparse_ch["controls"]["function to approximate"] = "zhou_vectorize"
 
     # create instance for borehole function
-    params_borehole = copy.deepcopy(params)
-    params_borehole["controls"][
+    params_borehole_sparse_ch = copy.deepcopy(params_sparse_ch)
+    params_borehole_sparse_ch["controls"][
         "function to approximate"
     ] = "borehole_wrapper_vectorize"
 
-    results_zhou = execute_study(params_zhou, interp_params)
-    # results_borehole = execute_study(params_borehole, interp_params)
+    # results_zhou_sparse_ch = execute_study(params_zhou_sparse_ch, interp_params_sparse_ch)
+    results_borehole_sparse_ch = execute_study(
+        params_borehole_sparse_ch, interp_params_sparse_ch
+    )
 
-    print(results_zhou)
+    # print(results_zhou_sparse_ch["gridpoints"])
+    print(results_borehole_sparse_ch["gridpoints"])

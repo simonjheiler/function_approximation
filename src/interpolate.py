@@ -429,11 +429,10 @@ def interpolate_sparse(points, grid, func, interp_params):
     interp = SparseInterpolator(level, dims, interpolation_type, intval)
 
     # evaluate function on grid
-    _ = interp.fit(func, points)
+    interp.fit(func, points)
 
     # generate interpolator
     results_interp = interp.evaluate(points)
-
     n_gridpoints_effective = len(interp.grid[level]["Y"])
 
     return results_interp, n_gridpoints_effective
