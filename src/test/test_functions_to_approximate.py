@@ -37,8 +37,8 @@ def setup_borehole_on_domain():
     out = {}
     out["input"] = np.array(
         object=[
-            [100000, 1000, 800, 1000, 0.1, 1500, 10000, 100],
-            [100000, 1000, 800, 1000, 0.1, 1500, 10000, 100],
+            [0.1, 1000, 100000, 1000, 100, 800, 1500, 10000],
+            [0.1, 1000, 100000, 1000, 100, 800, 1500, 10000],
         ],
         dtype=float,
     )
@@ -49,7 +49,7 @@ def setup_borehole_on_domain():
 def setup_borehole_truncated_input():
     out = {}
     out["input"] = np.array(
-        object=[[100000, 1000, 800, 1000, 0.1], [100000, 1000, 800, 1000, 0.1]],
+        object=[[0.1, 1000, 100000, 1000, 100], [0.1, 1000, 100000, 1000, 100]],
         dtype=float,
     )
     return out
@@ -59,10 +59,10 @@ def setup_borehole_truncated_input():
 def setup_borehole_large_set():
 
     grid_min = np.array(
-        object=[63070.0, 990.0, 700.0, 100.0, 0.05, 1120.0, 1500.0, 63.1], dtype=float,
+        object=[0.05, 100.0, 63070.0, 990.0, 63.1, 700.0, 1120.0, 1500.0], dtype=float,
     )
     grid_max = np.array(
-        object=[115600.0, 1110.0, 820.0, 50000.0, 0.15, 1680.0, 15000.0, 116.0],
+        object=[0.15, 50000.0, 115600.0, 1110.0, 116.0, 820.0, 1680.0, 15000.0],
         dtype=float,
     )
 
@@ -173,12 +173,8 @@ def test_borehole_numba_vectorize_on_domain(setup_borehole_on_domain):
 def test_borehole_readable_truncated_input(setup_borehole_truncated_input):
     expected = np.array(
         object=[
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
         ],
         dtype=float,
     )
@@ -189,12 +185,8 @@ def test_borehole_readable_truncated_input(setup_borehole_truncated_input):
 def test_borehole_numba_iter_truncated_input(setup_borehole_truncated_input):
     expected = np.array(
         object=[
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
         ],
         dtype=float,
     )
@@ -205,12 +197,8 @@ def test_borehole_numba_iter_truncated_input(setup_borehole_truncated_input):
 def test_borehole_numba_vectorize_truncated_input(setup_borehole_truncated_input):
     expected = np.array(
         object=[
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
-            np.pi
-            * 40000000
-            / ((1 + (100000 / 89.55)) * np.log(10000) + (280000000 / 82.50)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
+            np.pi * 48000000 / (1001 * np.log(10000) + (2800000000 / 825)),
         ],
         dtype=float,
     )

@@ -18,12 +18,12 @@ import numpy as np
 def borehole_readable(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    For comparability and flexibility in the simulation study, the input 
+    For comparability and flexibility in the simulation study, the input
     interface flexibly allows for inputs of different dimensionality. To
-    evaluate the function at the respective points, default values are 
-    appended for ommitted input dimensions (mean of respective domain, see 
+    evaluate the function at the respective points, default values are
+    appended for ommitted input dimensions (mean of respective domain, see
     input_default below).
-    
+
     This is the readable implementation for debugging and testing.
 
     Params
@@ -35,7 +35,7 @@ def borehole_readable(input):
         output : np.array(n, 1)
             function values at inputs
     """
-    input_default = [89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
+    input_default = [0.1, 25050.0, 89335.0, 1050.0, 89.55, 760.0, 1400.0, 8250.0]
 
     output = []
     for idx in range(input.shape[0]):
@@ -53,9 +53,9 @@ def borehole_readable(input):
         x8 = input_tmp[7]
 
         output_tmp = (
-            (2 * np.pi * x1 * (x2 - x3))
-            / np.log(x4 / x5)
-            / (1 + ((2 * x6 * x1) / (np.log(x4 / x5) * x5 ** 2 * x7)) + (x1 / x8))
+            (2 * np.pi * x3 * (x4 - x6))
+            / np.log(x2 / x1)
+            / (1 + ((2 * x7 * x3) / (np.log(x2 / x1) * x1 ** 2 * x8)) + (x3 / x5))
         )
         output.append(output_tmp)
 
@@ -68,10 +68,10 @@ def borehole_readable(input):
 def borehole_step_numba_iter(input):
     """Calculate the flow through a borehole given one point *input*.
 
-    Evaluate the borehole function for one input value. 
-    
+    Evaluate the borehole function for one input value.
+
     This is the numba implementation of the iterative step function.
-    
+
     Params
     -------
         inputs : np.array(1, d)
@@ -91,9 +91,9 @@ def borehole_step_numba_iter(input):
     x8 = input[7]
 
     output = (
-        (2 * np.pi * x1 * (x2 - x3))
-        / np.log(x4 / x5)
-        / (1 + ((2 * x6 * x1) / (np.log(x4 / x5) * x5 ** 2 * x7)) + (x1 / x8))
+        (2 * np.pi * x3 * (x4 - x6))
+        / np.log(x2 / x1)
+        / (1 + ((2 * x7 * x3) / (np.log(x2 / x1) * x1 ** 2 * x8)) + (x3 / x5))
     )
 
     return output
@@ -103,10 +103,10 @@ def borehole_step_numba_iter(input):
 def borehole_step_numba_vectorize(input):
     """Calculate the flow through a borehole given one point *input*.
 
-    Evaluate the borehole function for one input value. 
-    
+    Evaluate the borehole function for one input value.
+
     This is the numba implementation of the vectorized step function.
-    
+
     Params
     -------
         inputs : np.array(n, d)
@@ -126,9 +126,9 @@ def borehole_step_numba_vectorize(input):
     x8 = input[..., 7]
 
     output = (
-        (2 * np.pi * x1 * (x2 - x3))
-        / np.log(x4 / x5)
-        / (1 + ((2 * x6 * x1) / (np.log(x4 / x5) * x5 ** 2 * x7)) + (x1 / x8))
+        (2 * np.pi * x3 * (x4 - x6))
+        / np.log(x2 / x1)
+        / (1 + ((2 * x7 * x3) / (np.log(x2 / x1) * x1 ** 2 * x8)) + (x3 / x5))
     )
 
     return output
@@ -137,12 +137,12 @@ def borehole_step_numba_vectorize(input):
 def borehole_wrapper_iter(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    For comparability and flexibility in the simulation study, the input 
+    For comparability and flexibility in the simulation study, the input
     interface flexibly allows for inputs of different dimensionality. To
-    evaluate the function at the respective points, default values are 
-    appended for ommitted input dimensions (mean of respective domain, see 
+    evaluate the function at the respective points, default values are
+    appended for ommitted input dimensions (mean of respective domain, see
     input_default below).
-    
+
     This is the wrapper for the iterative numba implementation.
 
     Params
@@ -155,7 +155,7 @@ def borehole_wrapper_iter(input):
             function values at inputs
     """
     input_default = np.array(
-        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55],
+        object=[0.1, 25050.0, 89335.0, 1050.0, 89.55, 760.0, 1400.0, 8250.0]
     )
 
     points = np.full((input.shape[0], len(input_default)), np.nan)
@@ -183,12 +183,12 @@ def borehole_wrapper_iter(input):
 def borehole_wrapper_vectorize(input):
     """Calculate the flow through a borehole given *inputs*.
 
-    For comparability and flexibility in the simulation study, the input 
+    For comparability and flexibility in the simulation study, the input
     interface flexibly allows for inputs of different dimensionality. To
-    evaluate the function at the respective points, default values are 
-    appended for ommitted input dimensions (mean of respective domain, see 
+    evaluate the function at the respective points, default values are
+    appended for ommitted input dimensions (mean of respective domain, see
     input_default below).
-    
+
     This is the wrapper for the vectorized numba implementation.
 
     Params
@@ -201,7 +201,7 @@ def borehole_wrapper_vectorize(input):
             function values at inputs
     """
     input_default = np.array(
-        object=[89335.0, 1050.0, 760.0, 25050.0, 0.1, 1400.0, 8250.0, 89.55]
+        object=[0.1, 25050.0, 89335.0, 1050.0, 89.55, 760.0, 1400.0, 8250.0]
     )
 
     points = np.full((input.shape[0], len(input_default)), np.nan)
@@ -229,10 +229,10 @@ def borehole_wrapper_vectorize(input):
 def zhou_phi_readable(input):
     """Calculate the flow through a borehole given one point *input*.
 
-    Evaluate the Zhou (1998) phi function for one input value. 
-    
+    Evaluate the Zhou (1998) phi function for one input value.
+
     This is the readable implementation for debugging and testing.
-    
+
     Params
     -------
         input : np.array(1, d)
@@ -251,10 +251,10 @@ def zhou_phi_readable(input):
 def zhou_phi_vectorize(input):
     """Calculate the flow through a borehole given one point *input*.
 
-    Evaluate the Zhou (1998) phi function for multiple input values. 
-    
+    Evaluate the Zhou (1998) phi function for multiple input values.
+
     This is the vectorized implementation.
-    
+
     Params
     -------
         inputs : np.array(n, d)
@@ -274,10 +274,10 @@ def zhou_phi_vectorize(input):
 def zhou_phi_numba(input):
     """Calculate the flow through a borehole given one point *input*.
 
-    Evaluate the Zhou (1998) phi function for one input value. 
-    
+    Evaluate the Zhou (1998) phi function for one input value.
+
     This is the iterative numba implementation.
-    
+
     Params
     -------
         inputs : np.array(1, d)
