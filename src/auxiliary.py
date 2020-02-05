@@ -1,5 +1,4 @@
-"""Collection of auxiliary functions for simulation study
-"""
+"""Collection of auxiliary functions for simulation study"""
 import pdb  # noqa F401
 
 import numpy as np
@@ -203,14 +202,14 @@ def inputs_from_ids_batch(index, dims_state_grid, grid):
 
 def states_to_ids_batch(states, dims_state_grid):
     """Translate points to index values.
-    
+
     Parameters
     ----------
- 
- 
+
+
     Returns
     -------
- 
+
     """
     n_states, _ = states.shape
     ids = []

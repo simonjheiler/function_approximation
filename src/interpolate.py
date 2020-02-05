@@ -1,3 +1,4 @@
+"""Collection of interpolation routines and auxiliary functions"""
 import pdb  # noqa F401
 
 import numpy as np
