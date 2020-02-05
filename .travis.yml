@@ -10,7 +10,7 @@ install:
   - ./utils/travis_miniconda.sh
   - PATH="$HOME/miniconda/bin:$PATH"
   - conda env create -f environment.yml
-  - source activate topics_SBE_simonjheiler
+  - source activate function_approximation
 
 script:
   - pytest ./src/
