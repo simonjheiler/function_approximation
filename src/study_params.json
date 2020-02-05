@@ -5,11 +5,9 @@
     "evaluate off-grid": "False",
     "grid density": "medium",
     "dims": [
-      2,
-      3,
-      4
+      2
     ],
-    "iterations": 5,
+    "iterations": 8,
     "function to approximate": "zhou_vectorize",
     "number of points for accuracy check": 1000,
     "seed for accuracy check": 123
@@ -137,7 +135,12 @@
       5,
       7,
       9,
-      11
+      11,
+      13,
+      15,
+      25,
+      35,
+      45
     ]
   },
   "sparse": {

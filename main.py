@@ -135,6 +135,7 @@ def execute_study(study_params):
 
 
 def plot_results(results, params):
+
     plot_legend = []
     plot_x = []
     plot_y = []
@@ -155,6 +156,133 @@ def plot_results(results, params):
         "Interpolation accuracy (" + params["controls"]["grid density"] + " grid)"
     )
     plt.show()
+
+    return
+
+
+def compare_fit_2d_iter(params, iteration):
+
+    # set interpolation parameters
+    dims = 2
+    interpolation_method = params["controls"]["interpolation method"]
+    func_name = params["controls"]["function to approximate"]
+    func_name_short = func_name[: func_name.find("_")]
+    interpolator_name = params[interpolation_method]["interpolator"]
+    grid_density = params["controls"]["grid density"]
+    grid_method = params["controls"]["grid method"]
+    n_interpolation_points = params["controls"]["number of points for accuracy check"]
+    accuracy_check_seed = params["controls"]["seed for accuracy check"]
+
+    # set grid parameters
+    grid_params = {}
+    grid_params["orders"] = params["grid"]["orders"][grid_density]
+    grid_params["lower bounds"] = params["grid"]["lower bounds"][func_name_short]
+    grid_params["upper bounds"] = params["grid"]["upper bounds"][func_name_short]
+
+    # set functionals for function to approximate and interpolator
+    func = getattr(functions, func_name)
+    interpolator = getattr(interpolators, interpolator_name)
+
+    # generate grid / state space
+    grid, index = get_grid(grid_params, dims)
+
+    # generate grid for plotting
+    n_plot_x = n_plot_y = 100
+    n_plot = n_plot_x * n_plot_y
+    x = np.linspace(
+        grid_params["lower bounds"][0], grid_params["upper bounds"][0], n_plot_x
+    )
+    y = np.linspace(
+        grid_params["lower bounds"][1], grid_params["upper bounds"][1], n_plot_y
+    )
+    X, Y = np.meshgrid(x, y)
+    plot_grid = np.asarray([X.reshape(n_plot), Y.reshape(n_plot)]).T
+    func_on_plot_grid_actual = func(plot_grid)
+    func_on_plot_grid_actual = np.asarray(func_on_plot_grid_actual).reshape(
+        (n_plot_x, n_plot_y)
+    )
+
+    # adjust interpolation parameters
+    interp_params[interpolation_method]["grid method"] = grid_method
+    interp_params[interpolation_method]["evaluate off-grid"] = params["controls"][
+        "evaluate off-grid"
+    ]
+    if interpolation_method == "linear":
+        interp_params["linear"]["sparse grid level"] = params["linear"][
+            "sparse grid levels"
+        ][iteration]
+        interp_params["linear"]["interpolation points"] = params["linear"][
+            "interpolation points"
+        ][iteration]
+    elif interpolation_method == "spline":
+        interp_params["spline"]["interpolation points"] = params["spline"][
+            "interpolation points"
+        ][iteration]
+    elif interpolation_method == "smolyak":
+        interp_params["smolyak"]["sparse grid level"] = params["smolyak"][
+            "sparse grid levels"
+        ][iteration]
+    elif interpolation_method == "sparse":
+        interp_params["sparse"]["sparse grid level"] = params["sparse"][
+            "sparse grid levels"
+        ][iteration]
+
+    # interpolate and capture computation time
+    start = time()
+    func_on_plot_grid_interpolated, n_gridpoints_effective = interpolator(
+        plot_grid, grid, func, interp_params
+    )
+    stop = time()
+    runtime = stop - start
+    func_on_plot_grid_interpolated = np.asarray(func_on_plot_grid_interpolated).reshape(
+        (n_plot_x, n_plot_y)
+    )
+
+    # calculate approximation error
+    interpolation_points = get_interpolation_points(
+        n_interpolation_points, grid, accuracy_check_seed,
+    )
+    results_interp, n_gridpoints_effective = interpolator(
+        interpolation_points, grid, func, interp_params
+    )
+    results_calc = func(interpolation_points)
+    rmse = root_mean_squared_error(results_interp, results_calc)
+
+    # plot results
+    print(f"grid method: {grid_method}")
+    print(f"total number of interpolation points: {n_gridpoints_effective}")
+    print(f"runtime for interpolation: {runtime}")
+    print(f"root mean squared error: {rmse}")
+
+    fig = plt.figure(figsize=(16, 6))
+
+    ax = fig.add_subplot(
+        131, projection="3d", title=f"{func_name_short} function, dim=2 (calculated)"
+    )
+    ax.plot_surface(
+        X, Y, func_on_plot_grid_actual, rstride=1, cstride=1, cmap=plt.cm.magma
+    )
+    ax = fig.add_subplot(
+        132, projection="3d", title=f"{func_name_short} function, dim=2 (interpolated)"
+    )
+    ax.plot_surface(
+        X, Y, func_on_plot_grid_interpolated, rstride=1, cstride=1, cmap=plt.cm.magma
+    )
+    ax = fig.add_subplot(
+        133, projection="3d", title=f"{func_name_short} function, dim=2 (error)"
+    )
+    ax.plot_surface(
+        X,
+        Y,
+        func_on_plot_grid_actual - func_on_plot_grid_interpolated,
+        rstride=1,
+        cstride=1,
+        cmap=plt.cm.magma,
+    )
+    ax.set_zlim(0.0, ax.get_zlim()[1] * 2)
+
+    plt.show()
+    print("-------------------------------------------------------------------")
 
     return
 
@@ -222,7 +350,10 @@ def compare_results(results_1, results_2, params_1, params_2):
 
 if __name__ == "__main__":
 
-    results = execute_study(params_default)
+    params = params_default
 
-    # plot results
-    plot_results(results, params_default)
+    for iteration in [0, 1, 2, 3, 4, 5]:
+
+        interp_points = params["linear"]["interpolation points"][iteration]
+        print(f"iteration: {iteration}")
+        compare_fit_2d_iter(params, iteration)
