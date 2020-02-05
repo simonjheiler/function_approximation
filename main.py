@@ -31,10 +31,8 @@ if __name__ == "__main__":
 
     params = study_params
 
-    # for iteration in [0, 1, 2, 3, 4, 5]:
-    #
-    #     interp_points = study_params["linear"]["interpolation points"][iteration]
-    #     print(f"iteration: {iteration}")
-    #     compare_fit_2d_iter(params, interpolation_params, iteration)
+    for iteration in [0, 1, 2, 3, 4, 5]:
 
-    results = execute_study
+        interp_points = study_params["linear"]["interpolation points"][iteration]
+        print(f"iteration: {iteration}")
+        compare_fit_2d_iter(params, interpolation_params, iteration)
