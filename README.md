@@ -45,9 +45,11 @@ The following elements are under CI control:
 
 ## References
 
+* Garcke, Jochen. (2013). Sparse Grids in a Nutshell.
+* Judd, Kenneth L. (1998). "Numerical Methods in Economics," MIT Press Books, The MIT Press.
+* Keane, Michael & Wolpin, Kenneth. (1994). The Solution and Estimation of Discrete Choice Dynamic Programming Models by Simulation and Interpolation: Monte Carlo Evidence. The Review of Economics and Statistics. 76. 648-72.
 * Surjanovic, S. & Bingham, D. (2013). Virtual Library of Simulation Experiments: Test Functions and Datasets. Retrieved February 1, 2020, from http://www.sfu.ca/~ssurjano.
 * Zhou, Y. (1998). Adaptive importance sampling for integration. Ph.D. Thesis, Stanford University.
-
 
 ## License
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/HumanCapitalAnalysis/student-project-simonjheiler/master/LICENSE)
