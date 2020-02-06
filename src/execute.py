@@ -146,10 +146,10 @@ def plot_results(results, study_params):
     plot_legend = []
     plot_x = []
     plot_y = []
-    for dims in study_params["controls"]["dims"]:
-        plot_legend.append(dims)
-        plot_x.append(results["gridpoints"][dims])
-        plot_y.append(results["rmse"][dims])
+    for dim in study_params["controls"]["dims"]:
+        plot_legend.append("# vars: " + str(dim))
+        plot_x.append(results["gridpoints"][dim])
+        plot_y.append(results["rmse"][dim])
 
     for idx in range(len(study_params["controls"]["dims"])):
         plt.plot(plot_x[idx], plot_y[idx])
@@ -335,7 +335,7 @@ def compare_results(results_1, results_2, study_params_1, study_params_2):
     """
 
     plot_legend = []
-
+    plot_colors = ["b", "g", "r", "c", "m", "y", "k", "b"]
     dims = list(
         set(study_params_1["controls"]["dims"]).intersection(
             study_params_2["controls"]["dims"]
@@ -346,11 +346,13 @@ def compare_results(results_1, results_2, study_params_1, study_params_2):
         plt.plot(
             results_1["gridpoints"][dim],
             results_1["rmse"][dim],
-            "-",
+            str(plot_colors[dim] + "-"),
             results_2["gridpoints"][dim],
             results_2["rmse"][dim],
-            ":",
+            str(plot_colors[dim] + ":"),
         )
+        plot_legend.append(str(dim) + " vars (setting 1)")
+        plot_legend.append(str(dim) + " vars (setting 2)")
 
     plt.xscale("log")
     plt.yscale("log")
